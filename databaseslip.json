@@ -1,0 +1,48 @@
+{
+    "periode": "Mei 2025",
+    "karyawan": [
+        {
+            "id": "K001",
+            "nama": "Andi Pratama",
+            "jabatan": "Software Engineer",
+            "gajiPokok": 10000000,
+            "tunjangan": [
+                {"nama": "Tunjangan Transportasi", "jumlah": 1000000},
+                {"nama": "Tunjangan Makan", "jumlah": 750000}
+            ],
+            "potongan": [
+                {"nama": "BPJS Kesehatan", "jumlah": 200000},
+                {"nama": "Pajak PPh 21", "jumlah": 500000}
+            ]
+        },
+        {
+            "id": "K002",
+            "nama": "Budi Santoso",
+            "jabatan": "UI/UX Designer",
+            "gajiPokok": 8500000,
+            "tunjangan": [
+                {"nama": "Tunjangan Transportasi", "jumlah": 800000},
+                {"nama": "Tunjangan Kehadiran", "jumlah": 500000}
+            ],
+            "potongan": [
+                {"nama": "BPJS Kesehatan", "jumlah": 170000},
+                {"nama": "Pajak PPh 21", "jumlah": 400000}
+            ]
+        },
+        {
+            "id": "K003",
+            "nama": "Citra Lestari",
+            "jabatan": "Project Manager",
+            "gajiPokok": 12000000,
+            "tunjangan": [
+                {"nama": "Tunjangan Jabatan", "jumlah": 2000000},
+                {"nama": "Tunjangan Komunikasi", "jumlah": 300000}
+            ],
+            "potongan": [
+                {"nama": "BPJS Kesehatan", "jumlah": 240000},
+                {"nama": "Pajak PPh 21", "jumlah": 700000},
+                {"nama": "Potongan Pinjaman", "jumlah": 1000000}
+            ]
+        }
+    ]
+}

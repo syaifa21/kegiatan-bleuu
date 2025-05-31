@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slip Gaji Karyawan</title>
+    <style>
+        /* Gaya CSS tetap sama seperti sebelumnya */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        .employee-selector-container {
+            max-width: 600px;
+            margin: auto;
+            margin-bottom:10px;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .container { /* Ini akan menjadi #slipContentArea */
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: auto;
+        }
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .header p { margin: 5px 0; font-size: 14px; color: #555; }
+        .employee-details, .salary-details { margin-bottom: 20px; }
+        .employee-details h2, .salary-details h2 { font-size: 18px; border-bottom: 2px solid #eee; padding-bottom: 5px; margin-bottom: 10px; }
+        .detail-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
+        .detail-item:last-child { border-bottom: none; }
+        .detail-item span:first-child { font-weight: bold; color: #333; }
+        .detail-item span:last-child { color: #555; }
+        .total { font-weight: bold; font-size: 18px; color: #2c5282; }
+        .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #777; }
+        #employeeSelector { margin-bottom: 10px; padding: 8px; font-size: 16px; width: 100%;}
+        .export-buttons {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .export-buttons button {
+            padding: 10px 15px;
+            margin: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            background-color: #4CAF50;
+            color: white;
+        }
+        .export-buttons button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="employee-selector-container">
+        <label for="employeeSelector">Pilih Karyawan:</label>
+        <select id="employeeSelector" onchange="loadSalarySlip(this.value)" disabled>
+            <option>Memuat data...</option>
+        </select>
+    </div>
+
+    <div class="container" id="slipContentArea"> <div class="header">
+            <h1>Slip Gaji Karyawan</h1>
+            <p id="companyNameDisplay">PT. Maju Mundur Jaya</p>
+            <p>Periode: <span id="periodeGaji">-</span></p>
+        </div>
+
+        <div class="employee-details">
+            <h2>Detail Karyawan</h2>
+            <div class="detail-item">
+                <span>Nama Karyawan:</span>
+                <span id="namaKaryawan">-</span>
+            </div>
+            <div class="detail-item">
+                <span>ID Karyawan:</span>
+                <span id="idKaryawan">-</span>
+            </div>
+            <div class="detail-item">
+                <span>Jabatan:</span>
+                <span id="jabatanKaryawan">-</span>
+            </div>
+        </div>
+
+        <div class="salary-details">
+            <h2>Rincian Gaji</h2>
+            <div id="rincianPendapatan">
+                </div>
+            <hr>
+            <div id="rincianPotongan">
+                </div>
+            <hr>
+            <div class="detail-item total">
+                <span>Gaji Bersih (Netto):</span>
+                <span id="gajiBersih">Rp 0</span>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Dicetak pada: <span id="tanggalCetak"></span></p>
+            <p>Ini adalah dokumen yang dibuat secara otomatis.</p>
+        </div>
+    </div>
+
+    <div class="export-buttons">
+        <button onclick="exportToTXT()">Export ke TXT</button>
+        <button onclick="exportToHTML()">Export ke HTML</button>
+        <button onclick="exportToPDF()">Export ke PDF</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <script>
+        let databaseGaji = null;
+        const COMPANY_NAME = "PT. Maju Mundur Jaya"; // Definisikan nama perusahaan di sini
+
+        async function fetchDatabase() {
+            const selector = document.getElementById('employeeSelector');
+            try {
+                const response = await fetch('/data/databaseslip.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status} - Tidak dapat mengambil data.`);
+                }
+                const data = await response.json();
+                databaseGaji = data;
+                document.getElementById('companyNameDisplay').textContent = COMPANY_NAME; // Set nama perusahaan
+                loadEmployeeOptions();
+                if (selector) selector.disabled = false;
+            } catch (error) {
+                console.error("Gagal memuat database dari /data/databaseslip.json:", error);
+                alert("Gagal memuat data gaji dari server. Pastikan file /data/databaseslip.json tersedia dan server dikonfigurasi dengan benar. Error: " + error.message);
+                if (selector) {
+                    selector.innerHTML = '<option>Gagal memuat data</option>';
+                    selector.disabled = true;
+                }
+                clearSalarySlip();s
+            }
+        }
+
+        function formatRupiah(angka, useCurrencySymbol = true) {
+            if (useCurrencySymbol) {
+                return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+            }
+            return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0 }).format(angka);
+        }
+
+        function loadEmployeeOptions() {
+            const selector = document.getElementById('employeeSelector');
+            selector.innerHTML = '';
+
+            if (databaseGaji && databaseGaji.karyawan && Array.isArray(databaseGaji.karyawan)) {
+                if (databaseGaji.karyawan.length === 0) {
+                     selector.innerHTML = '<option>Tidak ada data karyawan</option>';
+                     selector.disabled = true;
+                     clearSalarySlip();
+                     alert("Tidak ada data karyawan untuk ditampilkan.");
+                     return;
+                }
+                databaseGaji.karyawan.forEach((karyawan) => {
+                    const option = document.createElement('option');
+                    option.value = karyawan.id;
+                    option.textContent = `${karyawan.nama} (${karyawan.id})`;
+                    selector.appendChild(option);
+                });
+                loadSalarySlip(databaseGaji.karyawan[0].id);
+                selector.disabled = false;
+            } else {
+                console.error("Data karyawan tidak valid atau tidak ditemukan.");
+                alert("Terjadi kesalahan: Format data karyawan tidak sesuai.");
+                selector.innerHTML = '<option>Kesalahan format data</option>';
+                selector.disabled = true;
+                clearSalarySlip();
+            }
+        }
+
+        function loadSalarySlip(employeeId) {
+            if (!databaseGaji || !databaseGaji.karyawan) {
+                console.error("Database gaji belum termuat atau tidak valid.");
+                clearSalarySlip();
+                return;
+            }
+            const karyawan = databaseGaji.karyawan.find(k => k.id === employeeId);
+            if (!karyawan) {
+                clearSalarySlip();
+                return;
+            }
+
+            document.getElementById('periodeGaji').textContent = databaseGaji.periode || "Belum ditentukan";
+            document.getElementById('namaKaryawan').textContent = karyawan.nama || "-";
+            document.getElementById('idKaryawan').textContent = karyawan.id || "-";
+            document.getElementById('jabatanKaryawan').textContent = karyawan.jabatan || "-";
+
+            const rincianPendapatanDiv = document.getElementById('rincianPendapatan');
+            const rincianPotonganDiv = document.getElementById('rincianPotongan');
+            rincianPendapatanDiv.innerHTML = '<h3>Pendapatan:</h3>';
+            rincianPotonganDiv.innerHTML = '<h3>Potongan:</h3>';
+
+            let totalPendapatan = karyawan.gajiPokok || 0;
+            let totalPotongan = 0;
+
+            const itemGajiPokok = document.createElement('div');
+            itemGajiPokok.classList.add('detail-item');
+            itemGajiPokok.innerHTML = `<span>Gaji Pokok:</span><span>${formatRupiah(karyawan.gajiPokok || 0)}</span>`;
+            rincianPendapatanDiv.appendChild(itemGajiPokok);
+
+            if (karyawan.tunjangan && Array.isArray(karyawan.tunjangan)) {
+                karyawan.tunjangan.forEach(t => {
+                    const itemTunjangan = document.createElement('div');
+                    itemTunjangan.classList.add('detail-item');
+                    itemTunjangan.innerHTML = `<span>${t.nama || 'Tunjangan Lain'}:</span><span>${formatRupiah(t.jumlah || 0)}</span>`;
+                    rincianPendapatanDiv.appendChild(itemTunjangan);
+                    totalPendapatan += (t.jumlah || 0);
+                });
+            }
+            const itemTotalPendapatan = document.createElement('div');
+            itemTotalPendapatan.classList.add('detail-item'); itemTotalPendapatan.style.fontWeight = 'bold';
+            itemTotalPendapatan.innerHTML = `<span>Total Pendapatan:</span><span>${formatRupiah(totalPendapatan)}</span>`;
+            rincianPendapatanDiv.appendChild(itemTotalPendapatan);
+
+            if (karyawan.potongan && Array.isArray(karyawan.potongan)) {
+                karyawan.potongan.forEach(p => {
+                    const itemPotongan = document.createElement('div');
+                    itemPotongan.classList.add('detail-item');
+                    itemPotongan.innerHTML = `<span>${p.nama || 'Potongan Lain'}:</span><span>${formatRupiah(p.jumlah || 0)}</span>`;
+                    rincianPotonganDiv.appendChild(itemPotongan);
+                    totalPotongan += (p.jumlah || 0);
+                });
+            }
+            const itemTotalPotongan = document.createElement('div');
+            itemTotalPotongan.classList.add('detail-item'); itemTotalPotongan.style.fontWeight = 'bold';
+            itemTotalPotongan.innerHTML = `<span>Total Potongan:</span><span>${formatRupiah(totalPotongan)}</span>`;
+            rincianPotonganDiv.appendChild(itemTotalPotongan);
+
+            const gajiBersih = totalPendapatan - totalPotongan;
+            document.getElementById('gajiBersih').textContent = formatRupiah(gajiBersih);
+
+            const today = new Date();
+            const optionsDate = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('tanggalCetak').textContent = today.toLocaleDateString('id-ID', optionsDate);
+        }
+
+        function clearSalarySlip() {
+            document.getElementById('periodeGaji').textContent = (databaseGaji && databaseGaji.periode) ? databaseGaji.periode : '-';
+            document.getElementById('namaKaryawan').textContent = '-';
+            document.getElementById('idKaryawan').textContent = '-';
+            document.getElementById('jabatanKaryawan').textContent = '-';
+            document.getElementById('rincianPendapatan').innerHTML = '<h3>Pendapatan:</h3>';
+            document.getElementById('rincianPotongan').innerHTML = '<h3>Potongan:</h3>';
+            document.getElementById('gajiBersih').textContent = formatRupiah(0);
+             const today = new Date();
+            const optionsDate = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('tanggalCetak').textContent = today.toLocaleDateString('id-ID', optionsDate);
+        }
+
+        function getCurrentSlipDetails() {
+            const currentEmployeeId = document.getElementById('employeeSelector').value;
+            if (!currentEmployeeId || !databaseGaji || !databaseGaji.karyawan) {
+                alert("Silakan pilih karyawan terlebih dahulu atau data belum dimuat.");
+                return null;
+            }
+            const employee = databaseGaji.karyawan.find(k => k.id === currentEmployeeId);
+            const period = databaseGaji.periode;
+
+            if (!employee) {
+                alert("Data karyawan tidak ditemukan untuk ekspor.");
+                return null;
+            }
+            return { employee, period, companyName: COMPANY_NAME };
+        }
+
+        function exportToTXT() {
+            const details = getCurrentSlipDetails();
+            if (!details) return;
+
+            const { employee, period, companyName } = details;
+
+            let totalPendapatan = employee.gajiPokok || 0;
+            if (employee.tunjangan) employee.tunjangan.forEach(t => totalPendapatan += (t.jumlah || 0));
+            let totalPotongan = 0;
+            if (employee.potongan) employee.potongan.forEach(p => totalPotongan += (p.jumlah || 0));
+            const gajiBersih = totalPendapatan - totalPotongan;
+
+            let txtContent = `SLIP GAJI KARYAWAN\n`;
+            txtContent += `========================================\n`;
+            txtContent += `Perusahaan : ${companyName}\n`;
+            txtContent += `Periode    : ${period}\n`;
+            txtContent += `========================================\n\n`;
+            txtContent += `DETAIL KARYAWAN\n`;
+            txtContent += `----------------------------------------\n`;
+            txtContent += `Nama       : ${employee.nama}\n`;
+            txtContent += `ID         : ${employee.id}\n`;
+            txtContent += `Jabatan    : ${employee.jabatan}\n`;
+            txtContent += `----------------------------------------\n\n`;
+            txtContent += `RINCIAN GAJI\n`;
+            txtContent += `----------------------------------------\n`;
+            txtContent += `Pendapatan:\n`;
+            txtContent += `  Gaji Pokok`.padEnd(30) + `: ${formatRupiah(employee.gajiPokok || 0)}\n`;
+            if (employee.tunjangan && employee.tunjangan.length > 0) {
+                employee.tunjangan.forEach(t => {
+                    txtContent += `  ${t.nama}`.padEnd(30) + `: ${formatRupiah(t.jumlah || 0)}\n`;
+                });
+            }
+            txtContent += `  Total Pendapatan`.padEnd(30) + `: ${formatRupiah(totalPendapatan)}\n\n`;
+            txtContent += `Potongan:\n`;
+            if (employee.potongan && employee.potongan.length > 0) {
+                employee.potongan.forEach(p => {
+                    txtContent += `  ${p.nama}`.padEnd(30) + `: ${formatRupiah(p.jumlah || 0)}\n`;
+                });
+            }
+            txtContent += `  Total Potongan`.padEnd(30) + `: ${formatRupiah(totalPotongan)}\n`;
+            txtContent += `----------------------------------------\n`;
+            txtContent += `GAJI BERSIH (NETTO)`.padEnd(30) + `: ${formatRupiah(gajiBersih)}\n`;
+            txtContent += `========================================\n`;
+            txtContent += `Dicetak pada: ${new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}\n`;
+
+            const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Slip_Gaji_${employee.nama.replace(/\s+/g, '_')}_${period.replace(/\s+/g, '_')}.txt`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+        }
+
+        function exportToHTML() {
+            const details = getCurrentSlipDetails();
+            if (!details) return;
+            const { employee, period } = details;
+
+            const slipHTMLContent = document.getElementById('slipContentArea').innerHTML;
+            const pageStyles = document.querySelector('head > style').innerHTML;
+
+            const fullHTML = `
+                <!DOCTYPE html>
+                <html lang="id">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Slip Gaji - ${employee.nama} - ${period}</title>
+                    <style>
+                        ${pageStyles}
+                        /* Anda bisa menambahkan gaya tambahan khusus untuk HTML yang diekspor jika perlu */
+                        body { margin: 0; padding: 0; background-color: #fff;} /* Hapus background abu2 untuk file html */
+                        .container { margin: 20px auto; } /* pastikan container tetap di tengah */
+                    </style>
+                </head>
+                <body>
+                    <div class="container" id="slipContentArea">
+                        ${slipHTMLContent}
+                    </div>
+                </body>
+                </html>
+            `;
+
+            const blob = new Blob([fullHTML], { type: 'text/html;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Slip_Gaji_${employee.nama.replace(/\s+/g, '_')}_${period.replace(/\s+/g, '_')}.html`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+        }
+
+        function exportToPDF() {
+            const details = getCurrentSlipDetails();
+            if (!details) return;
+            const { employee, period } = details;
+
+            const element = document.getElementById('slipContentArea');
+            const opt = {
+                margin:       [0.5, 0.5, 0.5, 0.5], // top, left, bottom, right in inches
+                filename:     `Slip_Gaji_${employee.nama.replace(/\s+/g, '_')}_${period.replace(/\s+/g, '_')}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, logging: false }, // logging:true jika ada masalah gambar
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
+                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] } // Mode page break
+            };
+
+            // Untuk memastikan kualitas dan tampilan, Anda bisa memberi sedikit waktu agar DOM render sempurna
+            setTimeout(() => {
+                html2pdf().from(element).set(opt).save()
+                .catch(err => {
+                    console.error("Error saat membuat PDF:", err);
+                    alert("Gagal membuat PDF. Silakan coba lagi atau cek konsol untuk error.");
+                });
+            }, 100); // delay kecil
+        }
+
+        window.onload = fetchDatabase;
+    </script>
+
+</body>
+</html>
