@@ -142,7 +142,7 @@ try {
                 $stmt->bind_param("sssssssii", $nama, $detail, $status, $tenggatDisplay, $tenggatSortable, $lampiranPath, $lampiranNamaOriginal, $taskId, $userId);
                 if (!$stmt->execute()) { throw new Exception('Gagal UPDATE tugas ID ' . $taskId . ': ' . $stmt->error); }
                 $stmt->close();
-                $notificationMessage = "✏️ *UPDATE TUGAS*\nUntuk *" . htmlspecialchars($usernameLoggedIn) . "*:\n";
+                $notificationMessage = "✏️ ||| UPDATE TUGAS||| \n Untuk *" . htmlspecialchars($usernameLoggedIn) . " \n";
                 $notificationMessage .= "Tugas diperbarui: *" . htmlspecialchars($taskData['nama']) . "*";
                 if ($previousTaskNameForNotif !== $taskData['nama']) { $notificationMessage .= "\n_(Nama lama: " . htmlspecialchars($previousTaskNameForNotif) . ")_"; }
             } else {
@@ -154,7 +154,7 @@ try {
                 if (!$stmt->execute()) { throw new Exception('Gagal INSERT tugas: ' . $stmt->error); }
                 $taskData['id'] = $conn->insert_id; // Dapatkan ID yang baru saja diinsert
                 $stmt->close();
-                $notificationMessage = "✨ *TUGAS BARU DITAMBAHKAN*\nUntuk |" . htmlspecialchars($usernameLoggedIn) . "| :\n";
+                $notificationMessage = "✨ ||| TUGAS BARU DITAMBAHKAN ||| \nUntuk |  " . htmlspecialchars($usernameLoggedIn) . "  | :\n";
                 $notificationMessage .= "Tugas baru: " . htmlspecialchars($taskData['nama']) . "-";
             }
             
