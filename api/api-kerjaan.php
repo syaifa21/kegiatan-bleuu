@@ -18,13 +18,13 @@ session_start(); // MULAI SESI DI SINI
 require_once __DIR__ . '/telegram_helpers.php'; // Digunakan untuk notifikasi Telegram
 require_once __DIR__ . '/db_connect.php'; // Dapatkan koneksi database
 
-$BOT_TOKEN_NOTIF = '7239871766:AAHWW70f_tuYhmFDC5LSgoUfGCv37VPnkVs';
+$BOT_TOKEN_NOTIF = '7239871766:AAHWW70f_tuYhmFDC5LSgoUfGCv36VPnkVs';
 
 $response = ['status' => 'error', 'message' => 'Terjadi kesalahan yang tidak diketahui.'];
 $conn = null;
 
 try {
-    $conn = getDbConnection(); // Dapatkan koneksi database
+    $conn = getDbConnection();
 
     // Cek user ID dari sesi
     $userId = $_SESSION['user_id'] ?? null;

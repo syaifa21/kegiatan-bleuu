@@ -76,7 +76,6 @@ const DataManager = {
             return data;
         } catch (error) {
             console.error("Error fetching list:", error);
-            // alert('Tidak dapat memuat daftar kerjaan: ' + error.message); // Komentar ini tetap bagus untuk dev
             return [];
         }
     },
@@ -111,7 +110,6 @@ const DataManager = {
             return result;
         } catch (error) {
             console.error("Error saving task:", error);
-            // alert('Gagal menyimpan kerjaan: ' + error.message);
             return { status: 'error', message: error.message };
         }
     },
@@ -133,7 +131,6 @@ const DataManager = {
             return result;
         } catch (error) {
             console.error("Error deleting task:", error);
-            // alert('Gagal menghapus kerjaan: ' + error.message);
             return { status: 'error', message: error.message };
         }
     }

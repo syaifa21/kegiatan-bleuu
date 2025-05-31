@@ -304,3 +304,103 @@ small.validation-message { font-size: 0.8em; margin-top: 4px; display: block; }
         font-size: 0.9em;
     }
 }
+/* style.css (Tambahkan ini) */
+
+.auth-container {
+    background-color: var(--card-bg-color);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px var(--shadow-color);
+    width: 100%;
+    max-width: 400px; /* Lebar maksimum untuk modal auth */
+    text-align: center;
+}
+
+.auth-container h2 {
+    color: var(--primary-color);
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-size: 1.8em;
+    font-weight: 700;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--secondary-color);
+    font-size: 0.95em;
+}
+
+.form-group input[type="text"],
+.form-group input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1em;
+    font-family: var(--font-family-sans-serif);
+    background-color: #fff;
+    color: var(--dark-color);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="password"]:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.15rem rgba(0,123,255,.25);
+    outline: none;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    margin-bottom: 10px; /* Untuk tombol utama di modal auth */
+}
+
+/* Override default for button.btn-secondary in modal auth */
+.auth-container .btn-secondary {
+    background-color: var(--secondary-color);
+    color: white;
+}
+.auth-container .btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+#authMessage.validation-message { /* Sesuaikan dengan kelas validasi yang ada */
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.9em;
+    display: none;
+    text-align: center;
+}
+
+#authMessage.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+#authMessage.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Media queries for smaller screens for auth modal */
+@media (max-width: 480px) {
+    .auth-container {
+        padding: 20px;
+    }
+    .auth-container h2 {
+        font-size: 1.5em;
+    }
+    .form-group input {
+        padding: 10px;
+        font-size: 0.9em;
+    }
+    .btn {
+        padding: 10px 15px;
+        font-size: 0.9em;
+    }
+}

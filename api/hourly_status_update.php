@@ -7,7 +7,7 @@ require_once __DIR__ . '/telegram_helpers.php';
 
 date_default_timezone_set('Asia/Jakarta');
 
-$BOT_TOKEN_NOTIF = '7239871766:AAHWW70f_tuYhmFDC5LSgoUfGCv37VPnkVs';
+$BOT_TOKEN_NOTIF = '7239871766:AAHWW70f_tuYhmFDC5LSgoUfGCv36VPnkVs';
 $scriptExecutionTime = date('Y-m-d H:i:s');
 
 try {

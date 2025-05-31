@@ -115,7 +115,9 @@ function createFancyBorder($text, $width = 40) {
     $maxLength = 0;
     foreach ($lines as $line) {
         // Menggunakan mb_strlen untuk menghitung panjang karakter multibyte (emoji)
-        $maxLength = max($maxLength, mb_strlen(preg_replace('/[\x{1F600}-\x{1F64F}\x{2600}-\x{26FF}\x{2700}-\x{27BF}]/u', ' ', $line), 'UTF-8'));
+        // dan mengganti emoji dengan spasi agar tidak mengganggu perhitungan lebar
+        $cleanLine = preg_replace('/[\x{1F600}-\x{1F64F}\x{2600}-\x{26FF}\x{2700}-\x{27BF}]/u', ' ', $line);
+        $maxLength = max($maxLength, mb_strlen($cleanLine, 'UTF-8'));
     }
     // Sesuaikan lebar bingkai, minimal selebar teks + padding
     $borderWidth = max($width, $maxLength + 4); 
@@ -125,9 +127,8 @@ function createFancyBorder($text, $width = 40) {
 
     $framedText = $topBorder . "\n";
     foreach ($lines as $line) {
-        // Ganti emoji dengan spasi untuk perhitungan padding yang akurat
-        $displayLine = preg_replace('/[\x{1F600}-\x{1F64F}\x{2600}-\x{26FF}\x{2700}-\x{27BF}]/u', ' ', $line);
-        $padding = $borderWidth - 4 - mb_strlen($displayLine, 'UTF-8');
+        $cleanLine = preg_replace('/[\x{1F600}-\x{1F64F}\x{2600}-\x{26FF}\x{2700}-\x{27BF}]/u', ' ', $line);
+        $padding = $borderWidth - 4 - mb_strlen($cleanLine, 'UTF-8');
         $framedText .= "┃ " . $line . str_repeat(" ", max(0, $padding)) . " ┃\n";
     }
     $framedText .= $bottomBorder;
