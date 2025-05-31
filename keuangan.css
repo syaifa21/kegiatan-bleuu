@@ -1,0 +1,424 @@
+/* Variabel CSS disesuaikan untuk tema gelap */
+:root {
+    --primary-color: #3b82f6; /* Warna biru yang lebih gelap, cocok dengan langit malam */
+    --secondary-color: #22c55e; /* Hijau cerah untuk tombol */
+    --accent-color: #facc15; /* Kuning cerah untuk aksen */
+    --background-color: #090a0f; /* Latar belakang paling gelap */
+    --card-background-color: rgba(30, 41, 59, 0.9); /* Latar belakang kartu sedikit transparan dan gelap */
+    --text-color: #e2e8f0; /* Warna teks utama menjadi terang */
+    --text-light-color: #9ca3af; /* Abu-abu terang untuk teks sekunder */
+    --border-color: rgba(71, 85, 105, 0.5); /* Warna border yang lebih gelap/transparan */
+    --danger-color: #ef4444; /* Merah yang lebih menonjol */
+    --warning-color: #facc15; /* Kuning yang lebih cerah */
+    --font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+    --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); /* Bayangan yang lebih menonjol di latar gelap */
+    --border-radius: 0.5rem;
+}
+
+/* Penyesuaian Global untuk Bintang dan Latar Belakang */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    min-height: 100vh;
+    background: linear-gradient(to bottom, #0b0b2b, #1b2735 70%, #090a0f); /* Latar belakang langit malam */
+    overflow-x: hidden; /* Mencegah scroll horizontal yang tidak diinginkan */
+    overflow-y: auto; /* Memungkinkan scroll vertikal */
+    font-family: var(--font-family);
+    color: var(--text-color); /* Warna teks utama menjadi terang */
+    line-height: 1.6;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.stars {
+    width: 1px;
+    height: 1px;
+    position: absolute;
+    background: white;
+    box-shadow: 2vw 5vh 2px white, 10vw 8vh 2px white, 15vw 15vh 1px white,
+        22vw 22vh 1px white, 28vw 12vh 2px white, 32vw 32vh 1px white,
+        38vw 18vh 2px white, 42vw 35vh 1px white, 48vw 25vh 2px white,
+        53vw 42vh 1px white, 58vw 15vh 2px white, 63vw 38vh 1px white,
+        68vw 28vh 2px white, 73vw 45vh 1px white, 78vw 32vh 2px white,
+        83vw 48vh 1px white, 88vw 20vh 2px white, 93vw 52vh 1px white,
+        98vw 35vh 2px white, 5vw 60vh 1px white, 12vw 65vh 2px white,
+        18vw 72vh 1px white, 25vw 78vh 2px white, 30vw 85vh 1px white,
+        35vw 68vh 2px white, 40vw 82vh 1px white, 45vw 92vh 2px white,
+        50vw 75vh 1px white, 55vw 88vh 2px white, 60vw 95vh 1px white,
+        65vw 72vh 2px white, 70vw 85vh 1px white, 75vw 78vh 2px white,
+        80vw 92vh 1px white, 85vw 82vh 2px white, 90vw 88vh 1px white,
+        95vw 75vh 2px white;
+    animation: twinkle 8s infinite linear;
+}
+
+.shooting-star {
+    position: absolute;
+    width: 100px;
+    height: 2px;
+    background: linear-gradient(90deg, white, transparent);
+    animation: shoot 3s infinite ease-in;
+    z-index: 10;
+}
+
+.shooting-star:nth-child(2) {
+    top: 20%;
+    left: -100px;
+    animation-delay: 0s;
+}
+
+.shooting-star:nth-child(3) {
+    top: 35%;
+    left: -100px;
+    animation-delay: 1s;
+}
+
+.shooting-star:nth-child(4) {
+    top: 50%;
+    left: -100px;
+    animation-delay: 2s;
+}
+
+.shooting-star:nth-child(5) {
+    top: 65%;
+    left: -100px;
+    animation-delay: 3s;
+}
+
+.shooting-star:nth-child(6) {
+    top: 80%;
+    left: -100px;
+    animation-delay: 4s;
+}
+
+@keyframes twinkle {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 0.4; }
+}
+
+@keyframes shoot {
+    0% { transform: translateX(0) translateY(0) rotate(25deg); opacity: 1; }
+    100% { transform: translateX(120vw) translateY(50vh) rotate(25deg); opacity: 0; }
+}
+
+.stars::after {
+    content: "";
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    background: white;
+    box-shadow: 8vw 12vh 2px white, 16vw 18vh 1px white, 24vw 25vh 2px white,
+        33vw 15vh 1px white, 41vw 28vh 2px white, 49vw 35vh 1px white,
+        57vw 22vh 2px white, 65vw 42vh 1px white, 73vw 28vh 2px white,
+        81vw 48vh 1px white, 89vw 32vh 2px white, 97vw 45vh 1px white,
+        3vw 68vh 2px white, 11vw 75vh 1px white, 19vw 82vh 2px white,
+        27vw 88vh 1px white, 35vw 72vh 2px white, 43vw 85vh 1px white,
+        51vw 92vh 2px white, 59vw 78vh 1px white;
+    animation: twinkle 6s infinite linear reverse;
+}
+/* Akhir Penyesuaian Global untuk Bintang dan Latar Belakang */
+
+.app-container {
+    position: relative; /* Penting untuk z-index */
+    z-index: 100; /* Pastikan konten utama berada di atas bintang */
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 15px;
+}
+
+.app-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1rem 1.5rem; background-color: rgba(30, 41, 59, 0.9); /* Card background dark */
+    border-radius: var(--border-radius); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4); /* Darker shadow */
+    margin-bottom: 1.5rem;
+}
+.app-header h1 { font-size: 1.6em; color: var(--primary-color); margin: 0; }
+.button-back {
+    background-color: var(--primary-color); color: white; padding: 0.6rem 1.2rem;
+    text-decoration: none; border-radius: var(--border-radius); font-weight: 500;
+    transition: background-color 0.3s ease; font-size: 0.9em;
+}
+.button-back:hover { background-color: #2563eb; } /* Darker hover */
+
+.month-selector-container {
+    display: flex; justify-content: center; align-items: center; gap: 10px;
+    margin-bottom: 1.5rem; padding: 1rem;
+    background-color: var(--card-background-color); /* Card background dark */
+    border-radius: var(--border-radius); box-shadow: var(--box-shadow);
+}
+.month-selector-container select,
+.month-selector-container button {
+    padding: 0.6rem 1rem;
+    border-radius: var(--border-radius);
+    font-size: 0.95em;
+    cursor: pointer;
+}
+.month-selector-container select {
+    border: 1px solid var(--border-color); /* Darker border */
+    background-color: var(--light-color); /* Darker background for select */
+    color: var(--text-color); /* Light text for select */
+    min-width: 150px;
+}
+.month-selector-container button {
+    border: 1px solid var(--primary-color);
+    background-color: var(--primary-color);
+    color: white;
+    transition: background-color 0.3s ease;
+}
+.month-selector-container button:hover {
+    background-color: #2563eb; /* Darker hover */
+}
+
+
+.main-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+    gap: 1.5rem;
+}
+
+.card {
+    background-color: var(--card-background-color); /* Card background dark */
+    border-radius: var(--border-radius); box-shadow: var(--box-shadow);
+    padding: 1.25rem;
+    display: flex; flex-direction: column;
+    color: var(--text-color); /* Light text for card content */
+}
+.card-header {
+    margin-bottom: 1rem; padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color); /* Darker border */
+}
+.card-header h2 { font-size: 1.2em; color: var(--primary-color); margin: 0; }
+.card-content { flex-grow: 1; }
+
+.table-responsive-wrapper {
+    overflow-x: auto;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+table {
+    width: 100%; border-collapse: collapse;
+}
+th, td {
+    border: 1px solid var(--border-color); /* Darker border */
+    padding: 0.6rem 0.7rem;
+    text-align: left; vertical-align: middle; font-size: 0.88em;
+    word-break: break-word;
+}
+th {
+    background-color: rgba(71, 85, 105, 0.2); /* Darker header background */
+    color: var(--primary-color);
+    font-weight: 600; text-transform: uppercase; white-space: nowrap;
+}
+#tabel-alokasi tbody tr:nth-child(even) td,
+#tabel-pendapatan-bulanan tbody tr:nth-child(even) td,
+#tabel-pengeluaran-bulanan tbody tr:nth-child(even) td,
+#tabel-pendapatan-tetap tbody tr:nth-child(even) td,
+#tabel-pengeluaran-tetap tbody tr:nth-child(even) td {
+     background-color: rgba(30, 41, 59, 0.7); /* Slightly darker even rows */
+}
+.total-row td {
+    font-weight: bold; background-color: var(--primary-color) !important; color: white;
+}
+#tabel-alokasi tfoot .total-row td:first-child {
+     color: var(--text-color); background-color: rgba(71, 85, 105, 0.2) !important; /* Darker footer first cell */
+}
+#tabel-alokasi input[type="number"].persen-alokasi {
+    max-width: 65px;
+    padding: 0.5rem;
+    font-size: 0.88em;
+    background-color: var(--light-color); /* Darker input background */
+    color: var(--text-color); /* Light text for input */
+    border: 1px solid var(--border-color); /* Darker border */
+}
+
+.input-group { margin-bottom: 1rem; display: flex; flex-direction: column; }
+.input-group label {
+    margin-bottom: 0.3rem; font-weight: 500;
+    color: var(--text-light-color); font-size: 0.85em;
+}
+.input-group input[type="text"],
+.input-group input[type="number"],
+.input-group input[type="text"][readonly], /* Style for readonly input */
+.input-group input[type="number"][readonly] {
+    padding: 0.7rem;
+    border: 1px solid var(--border-color); /* Darker border */
+    border-radius: var(--border-radius); font-size: 0.9em;
+    width: 100%;
+    background-color: var(--light-color); /* Darker input background */
+    color: var(--text-color); /* Light text for input */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.input-group input:focus {
+    outline: none; border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3); /* Darker focus shadow */
+}
+.input-group input[readonly] {
+    background-color: rgba(71, 85, 105, 0.2); /* Darker readonly background */
+    cursor: default;
+}
+
+
+.button-actions-container { display: flex; justify-content: flex-end; margin-top: 1rem;}
+
+button, .button {
+    background-color: var(--secondary-color); color: white; border: none;
+    padding: 0.6rem 1.1rem;
+    text-align: center; text-decoration: none;
+    display: inline-block; font-size: 0.88em;
+    font-weight: 500;
+    border-radius: var(--border-radius); cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+button:hover, .button:hover { background-color: #16a34a; transform: translateY(-1px); box-shadow: 0 1px 3px rgba(0,0,0,0.2); } /* Darker hover shadow */
+button:active, .button:active {transform: translateY(0px); box-shadow: none;}
+
+button.primary, .button.primary { background-color: var(--primary-color); }
+button.primary:hover, .button.primary:hover { background-color: #2563eb; } /* Darker hover */
+button.secondary, .button.secondary { background-color: var(--text-light-color); color: var(--text-color); } /* Secondary button with light text */
+button.secondary:hover, .button.secondary:hover { background-color: #6b7280; color: white;} /* Darker hover for secondary */
+button.danger, .button.danger { background-color: var(--danger-color); }
+button.danger:hover, .button.danger:hover { background-color: #b91c1c; } /* Darker hover */
+button#clear-data-button { background-color: var(--danger-color); margin-left: 10px;}
+button#clear-data-button:hover { background-color: #b91c1c; }
+button#delete-month-data-button { background-color: var(--warning-color); margin-left: 10px; color: var(--dark-color); } /* Changed to warning color with dark text */
+button#delete-month-data-button:hover { background-color: #eab308; color: var(--text-color); } /* Darker hover with light text */
+
+
+.summary-card {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #1d4ed8 100%); /* Darker gradient */
+    color: white;
+}
+.summary-card .card-header h2 { color: white; }
+.summary-card p {
+    font-size: 1.05em; margin: 0.8rem 0; display: flex; justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15); padding-bottom: 0.6rem;
+}
+.summary-card p:last-child { border-bottom: none; padding-bottom: 0; }
+.summary-card p span:last-child { font-weight: bold; }
+#summary-sisa-dana-bulanan.negative { color: var(--accent-color); } /* Accent color for negative */
+#summary-sisa-dana-bulanan.positive { color: #86efac; } /* Lighter green for positive */
+
+.summary-global-card {
+    background: linear-gradient(135deg, #6d28d9 0%, #ea580c 100%); /* Darker purple/orange */
+    color: white;
+}
+.summary-global-card .card-header h2 { color: white; }
+.summary-global-card p {
+    font-size: 1.05em; margin: 0.8rem 0; display: flex; justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15); padding-bottom: 0.6rem;
+}
+.summary-global-card p:last-child { border-bottom: none; padding-bottom: 0; }
+.summary-global-card p span:last-child { font-weight: bold; }
+#summary-sisa-dana-global.negative { color: var(--accent-color); }
+#summary-sisa-dana-global.positive { color: #86efac; }
+
+
+.editable { cursor: pointer; }
+.editable:hover { background-color: rgba(71, 85, 105, 0.2) !important; } /* Darker hover */
+
+#warning-persentase {
+    font-weight: 500; margin-top: 0.75rem; padding: 0.75rem;
+    border-radius: var(--border-radius); display: none; font-size: 0.85em;
+}
+#warning-persentase.error { background-color: #fee2e2; color: #991b1b; display: block; } /* Darker error color */
+#warning-persentase.warning { background-color: #fffbeb; color: #92400e; display: block; } /* Darker warning color */
+
+.main-action-buttons, .export-buttons-container {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem;
+    margin-top: 1.5rem; padding: 1rem; background-color: var(--card-background-color); /* Darker background */
+    border-radius: var(--border-radius); box-shadow: var(--box-shadow);
+    color: var(--text-color);
+}
+.export-buttons-container h3 { width: 100%; text-align: center; margin-bottom: 0.5rem; font-size: 1.1em; color: var(--text-color); }
+
+/* Chart Styles */
+.chart-card {
+    grid-column: 1 / -1; /* Lebarkan chart agar mengambil seluruh lebar grid */
+    min-height: 350px; /* Tinggi minimum untuk canvas chart */
+    display: flex;
+    flex-direction: column; /* Changed to column to allow header and content */
+    justify-content: flex-start; /* Align content to top */
+    align-items: center;
+}
+.chart-card canvas {
+    max-width: 100%;
+    height: auto;
+    flex-grow: 1; /* Allow canvas to take available space */
+}
+.chart-card .card-content {
+    width: 100%; /* Ensure canvas container takes full width */
+    padding-top: 0; /* Remove top padding as header is separate */
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.8); display: none; /* Darker overlay */
+    justify-content: center; align-items: center; z-index: 1000;
+    opacity: 0; transition: opacity 0.2s ease-in-out; padding: 15px;
+}
+.modal-overlay.active { display: flex; opacity: 1; }
+
+.modal-content {
+    background-color: var(--card-background-color); padding: 1.5rem;
+    border-radius: var(--border-radius); box-shadow: 0 5px 20px rgba(0,0,0,0.3); /* Darker shadow */
+    width: 100%; max-width: 480px;
+    transform: scale(0.95);
+    transition: transform 0.2s ease-in-out;
+    color: var(--text-color);
+}
+.modal-overlay.active .modal-content { transform: scale(1); }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.modal-header h3 { font-size: 1.2em; color: var(--primary-color); margin: 0;}
+.modal-close-button {
+    background: none; border: none; font-size: 1.8em; cursor: pointer;
+    color: var(--text-light-color); line-height: 1; padding: 0.25rem;
+}
+.modal-close-button:hover { color: var(--danger-color); }
+.modal-body { margin-bottom: 1.25rem; }
+.modal-footer {
+    display: flex; justify-content: flex-end; gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+footer {
+    text-align: center; margin-top: 2rem; padding: 1.5rem 0;
+    font-size: 0.85em; color: var(--text-light-color);
+    border-top: 1px solid var(--border-color); /* Darker border */
+}
+
+@media (max-width: 768px) {
+    .app-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; padding: 0.8rem 1rem; }
+    .app-header h1 { font-size: 1.4em; }
+    .main-content { grid-template-columns: 1fr; gap: 1rem; }
+    .card { padding: 1rem; }
+    .month-selector-container { flex-direction: column; }
+    .month-selector-container select, .month-selector-container button { width: 100%; }
+    .chart-card { min-height: 300px; }
+}
+@media (max-width: 480px) {
+    body { font-size: 14px; }
+    .app-header h1 { font-size: 1.3em; }
+    .button-back { padding: 0.5rem 1rem; font-size: 0.85em;}
+    th, td { padding: 0.5rem 0.6rem; font-size: 0.82em; }
+    #tabel-alokasi input[type="number"].persen-alokasi { max-width: 55px; font-size: 0.82em; padding: 0.4rem;}
+    .input-group input[type="text"], .input-group input[type="number"], .input-group input[type="text"][readonly], .input-group input[type="number"][readonly] { padding: 0.6rem; font-size: 0.85em; }
+    .input-group label { font-size: 0.8em; }
+    button, .button { padding: 0.5rem 0.9rem; font-size: 0.85em; }
+    .summary-card p { font-size: 1em; margin: 0.6rem 0; padding-bottom: 0.5rem;}
+    .modal-content { padding: 1rem; }
+    .modal-header h3 { font-size: 1.1em; }
+    .modal-footer { justify-content: center; }
+    .modal-footer button { width: calc(50% - 0.3rem); }
+    .modal-footer button:only-child { width: 100%;}
+    .export-buttons-container button, .main-action-buttons button { width: 100%; margin-bottom: 0.5rem; }
+    .export-buttons-container button:last-child, .main-action-buttons button:last-child { margin-bottom: 0; }
+    .chart-card { min-height: 250px; }
+}
+ @media (max-width: 360px) {
+    th, td { padding: 0.4rem 0.5rem; font-size: 0.78em; }
+    .app-header h1 { font-size: 1.2em; }
+    .modal-footer button { width: 100%; margin-bottom: 0.5rem; }
+    .modal-footer button:last-child { margin-bottom: 0;}
+ }

@@ -1,50 +1,154 @@
 :root {
-    --primary-color: #007AFF;
-    --primary-hover-color: #0056b3;
-    --secondary-color: #6c757d;
-    --light-color: #f8f9fa;
-    --dark-color: #212529;
-    --card-bg-color: #ffffff;
-    --border-color: #dee2e6;
-    --shadow-color: rgba(0, 0, 0, 0.075);
+    --primary-color: #3b82f6; /* Warna biru yang lebih gelap, cocok dengan langit malam */
+    --primary-hover-color: #2563eb; /* Hover yang sedikit lebih gelap */
+    --secondary-color: #9ca3af; /* Abu-abu netral untuk teks sekunder */
+    --light-color: #1a202c; /* Warna latar belakang yang lebih gelap untuk elemen ringan */
+    --dark-color: #e2e8f0; /* Warna teks yang lebih terang untuk latar belakang gelap */
+    --card-bg-color: rgba(30, 41, 59, 0.9); /* Latar belakang kartu sedikit transparan dan gelap */
+    --border-color: rgba(71, 85, 105, 0.5); /* Warna border yang lebih gelap/transparan */
+    --shadow-color: rgba(0, 0, 0, 0.2); /* Bayangan yang lebih menonjol di latar gelap */
     --font-family-sans-serif: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
-    --status-belum: #ffc107;
-    --status-proses: #17a2b8;
-    --status-selesai: #28a745;
-    --status-overdue: #dc3545;
+    --status-belum: #facc15; /* Kuning yang lebih cerah */
+    --status-proses: #38bdf8; /* Biru cerah */
+    --status-selesai: #22c55e; /* Hijau cerah */
+    --status-overdue: #ef4444; /* Merah yang lebih menonjol */
 }
 
-*, *::before, *::after { box-sizing: border-box; }
-
-/* Mencegah scroll horizontal yang tidak diinginkan */
-html, body {
-    overflow-x: hidden;
-    /* Optional: Atur min-width pada body jika ada elemen yang sering menyebabkan overflow horizontal, 
-       namun lebih baik perbaiki elemen penyebabnya */
-    /* min-width: 320px; */ 
+/* Penyesuaian Global untuk Bintang dan Latar Belakang */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-    font-family: var(--font-family-sans-serif);
-    margin: 0;
-    background-color: var(--light-color);
-    color: var(--dark-color);
-    line-height: 1.6;
-    font-size: 15px;
-    -webkit-text-size-adjust: 100%;
-    -ms-text-size-adjust: 100%;
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #0b0b2b, #1b2735 70%, #090a0f); /* Latar belakang langit malam */
+  overflow-x: hidden; /* Mencegah scroll horizontal yang tidak diinginkan */
+  overflow-y: auto; /* Memungkinkan scroll vertikal */
+  font-family: var(--font-family-sans-serif);
+  color: var(--dark-color); /* Warna teks utama menjadi terang */
+  line-height: 1.6;
+  font-size: 15px;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
 }
 
+.stars {
+  width: 1px;
+  height: 1px;
+  position: absolute;
+  background: white;
+  box-shadow: 2vw 5vh 2px white, 10vw 8vh 2px white, 15vw 15vh 1px white,
+    22vw 22vh 1px white, 28vw 12vh 2px white, 32vw 32vh 1px white,
+    38vw 18vh 2px white, 42vw 35vh 1px white, 48vw 25vh 2px white,
+    53vw 42vh 1px white, 58vw 15vh 2px white, 63vw 38vh 1px white,
+    68vw 28vh 2px white, 73vw 45vh 1px white, 78vw 32vh 2px white,
+    83vw 48vh 1px white, 88vw 20vh 2px white, 93vw 52vh 1px white,
+    98vw 35vh 2px white, 5vw 60vh 1px white, 12vw 65vh 2px white,
+    18vw 72vh 1px white, 25vw 78vh 2px white, 30vw 85vh 1px white,
+    35vw 68vh 2px white, 40vw 82vh 1px white, 45vw 92vh 2px white,
+    50vw 75vh 1px white, 55vw 88vh 2px white, 60vw 95vh 1px white,
+    65vw 72vh 2px white, 70vw 85vh 1px white, 75vw 78vh 2px white,
+    80vw 92vh 1px white, 85vw 82vh 2px white, 90vw 88vh 1px white,
+    95vw 75vh 2px white;
+  animation: twinkle 8s infinite linear;
+}
+
+.shooting-star {
+  position: absolute;
+  width: 100px;
+  height: 2px;
+  background: linear-gradient(90deg, white, transparent);
+  animation: shoot 3s infinite ease-in;
+  z-index: 10; /* Pastikan bintang jatuh di atas bintang biasa */
+}
+
+.shooting-star:nth-child(2) { /* Nth-child ini akan mulai dari elemen shooting-star pertama di HTML */
+  top: 20%;
+  left: -100px;
+  animation-delay: 0s;
+}
+
+.shooting-star:nth-child(3) {
+  top: 35%;
+  left: -100px;
+  animation-delay: 1s;
+}
+
+.shooting-star:nth-child(4) {
+  top: 50%;
+  left: -100px;
+  animation-delay: 2s;
+}
+
+.shooting-star:nth-child(5) {
+  top: 65%;
+  left: -100px;
+  animation-delay: 3s;
+}
+
+.shooting-star:nth-child(6) {
+  top: 80%;
+  left: -100px;
+  animation-delay: 4s;
+}
+
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes shoot {
+  0% {
+    transform: translateX(0) translateY(0) rotate(25deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(120vw) translateY(50vh) rotate(25deg);
+    opacity: 0;
+  }
+}
+
+/* Additional twinkling stars with different animation timing */
+.stars::after {
+  content: "";
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  background: white;
+  box-shadow: 8vw 12vh 2px white, 16vw 18vh 1px white, 24vw 25vh 2px white,
+    33vw 15vh 1px white, 41vw 28vh 2px white, 49vw 35vh 1px white,
+    57vw 22vh 2px white, 65vw 42vh 1px white, 73vw 28vh 2px white,
+    81vw 48vh 1px white, 89vw 32vh 2px white, 97vw 45vh 1px white,
+    3vw 68vh 2px white, 11vw 75vh 1px white, 19vw 82vh 2px white,
+    27vw 88vh 1px white, 35vw 72vh 2px white, 43vw 85vh 1px white,
+    51vw 92vh 2px white, 59vw 78vh 1px white;
+  animation: twinkle 6s infinite linear reverse;
+}
+/* Akhir Penyesuaian Global untuk Bintang dan Latar Belakang */
+
+
 /* Container utama yang responsif */
+/* Pastikan container berada di atas elemen bintang dengan z-index */
 .container {
+    position: relative; /* Penting untuk z-index */
+    z-index: 100; /* Pastikan konten utama berada di atas bintang */
     width: 100%;
     padding: 0 10px; /* Padding default yang moderat */
     margin: 10px auto;
 }
 
 header {
-    background: linear-gradient(120deg, hsl(210, 80%, 55%) 0%, hsl(220, 70%, 45%) 100%);
+    /* Gradien header disesuaikan agar lebih cocok dengan tema malam */
+    background: linear-gradient(120deg, #1d4ed8 0%, #0c4a6e 100%); /* Biru gelap ke biru tua */
     color: white;
     padding: 20px 25px;
     border-radius: 16px;
@@ -54,7 +158,7 @@ header {
     align-items: center;
     flex-wrap: wrap;
     gap: 20px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4); /* Bayangan lebih gelap */
     position: sticky;
     top: 10px;
     z-index: 999;
@@ -63,15 +167,15 @@ header {
 
 .header-title-group { flex-grow: 1; }
 header #greetingMessage { margin: 0; font-size: 1.9em; font-weight: 700; line-height: 1.2; }
-header #liveClock { font-size: 2em; font-weight: 400; color: rgba(255, 255, 255, 0.85); margin-top: 4px; letter-spacing: 0.5px; }
+header #liveClock { font-size: 2em; font-weight: 400; color: rgba(255, 255, 255, 0.7); margin-top: 4px; letter-spacing: 0.5px; } /* Warna jam disesuaikan */
 header #liveClock::before { content: "🕒 "; margin-right: 6px; opacity: 0.8; }
 .header-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.navigation-tabs { display:flex; gap:6px; background-color: rgba(0, 0, 0, 0.1); padding: 5px; border-radius: 8px; }
+.navigation-tabs { display:flex; gap:6px; background-color: rgba(255, 255, 255, 0.1); padding: 5px; border-radius: 8px; } /* Latar navigasi lebih transparan */
 .navigation-tabs .btn { background-color: transparent; color: rgba(255, 255, 255, 0.8); border: none; padding: 7px 14px; font-size: 0.85em; font-weight: 500; border-radius: 6px; transition: background-color 0.25s ease, color 0.25s ease, transform 0.2s ease; position: relative; }
-.navigation-tabs .btn:hover { background-color: rgba(255, 255, 255, 0.15); color: white; transform: translateY(-1px); }
-.navigation-tabs .btn.active { background-color: var(--card-bg-color); color: var(--primary-color); font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-header button#openInputModalBtn { background-color: #f1c40f; color: var(--dark-color); border: none; font-weight: 600; padding: 10px 20px; font-size: 0.9em; border-radius: 8px; box-shadow: 0 3px 7px rgba(0,0,0,0.15); transition: background-color 0.25s ease, transform 0.2s ease, box-shadow 0.2s ease; }
-header button#openInputModalBtn:hover { background-color: #f39c12; color: white; transform: translateY(-2px) scale(1.02); box-shadow: 0 5px 10px rgba(0,0,0,0.2); }
+.navigation-tabs .btn:hover { background-color: rgba(255, 255, 255, 0.2); color: white; transform: translateY(-1px); } /* Hover lebih kontras */
+.navigation-tabs .btn.active { background-color: var(--card-bg-color); color: var(--primary-color); font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.2); } /* Warna aktif dari card-bg-color baru */
+header button#openInputModalBtn { background-color: var(--status-belum); color: var(--dark-color); border: none; font-weight: 600; padding: 10px 20px; font-size: 0.9em; border-radius: 8px; box-shadow: 0 3px 7px rgba(0,0,0,0.2); transition: background-color 0.25s ease, transform 0.2s ease, box-shadow 0.2s ease; } /* Warna tombol lebih terang */
+header button#openInputModalBtn:hover { background-color: #d97706; color: white; transform: translateY(-2px) scale(1.02); box-shadow: 0 5px 10px rgba(0,0,0,0.3); } /* Hover tombol lebih gelap */
 
 /* MEDIA QUERIES UNTUK LAYAR SEDANG (misal tablet dalam mode portrait) */
 @media (max-width: 880px) {
@@ -251,11 +355,46 @@ header button#openInputModalBtn:hover { background-color: #f39c12; color: white;
 @keyframes fadeInSection { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
 .dashboard-section {
-    background-color: var(--card-bg-color);
+    background-color: var(--card-bg-color); /* Menggunakan card-bg-color yang baru */
     padding: 15px;
     border-radius: 12px;
     box-shadow: 0 6px 20px var(--shadow-color);
 }
+
+/* Penyesuaian untuk Quote Section */
+.quote-section {
+    background-color: var(--card-bg-color);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px var(--shadow-color);
+    margin-bottom: 20px;
+}
+
+.quote-section h2 {
+    margin-bottom: 15px;
+    color: var(--primary-color);
+    font-size: 1.5em;
+    text-align: center;
+}
+
+#dailyQuote {
+    font-size: 1.1em;
+    line-height: 1.8;
+    font-style: italic;
+    color: var(--dark-color); /* Warna teks agar terbaca di latar gelap */
+    text-align: center;
+    word-wrap: break-word;
+    word-break: break-word;
+    padding: 0 10px;
+    transition: opacity 1s ease-in-out;
+}
+
+#dailyQuote.fade-out {
+    opacity: 0;
+}
+
+/* Akhir Penyesuaian untuk Quote Section */
+
 .dashboard-section-header {
     display: flex;
     flex-direction: column; /* Default ke kolom untuk konsistensi */
@@ -274,21 +413,21 @@ header button#openInputModalBtn:hover { background-color: #f39c12; color: white;
 }
 .filter-controls > div { display: flex; flex-direction: column;}
 .filter-controls label { margin-bottom: 4px; font-weight: 500; color: var(--secondary-color); font-size: 0.9em;}
-.filter-controls select { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.9em; background-color: #fff;}
+.filter-controls select { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.9em; background-color: var(--light-color); color: var(--dark-color); } /* Input/select disesuaikan */
 
 .task-list { list-style-type: none; padding: 0; max-height: 400px; overflow-y: auto; }
 .task-item {
-    background-color: #fff;
+    background-color: var(--card-bg-color); /* Warna item tugas dari card-bg-color */
     border: 1px solid var(--border-color);
     padding: 12px 15px;
     margin-bottom: 10px;
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.2s ease-out;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
     position: relative;
 }
-.task-item:hover { border-left: 5px solid var(--primary-color); padding-left: 10px; box-shadow: 0 5px 12px rgba(0,0,0,0.08); transform: translateX(2px); }
+.task-item:hover { border-left: 5px solid var(--primary-color); padding-left: 10px; box-shadow: 0 5px 12px rgba(0,0,0,0.2); transform: translateX(2px); }
 .task-item strong { display: block; font-size: 1.05em; font-weight: 600; color: var(--dark-color); margin-bottom: 6px; }
 .task-item .task-meta {
     font-size: 0.85em;
@@ -301,11 +440,11 @@ header button#openInputModalBtn:hover { background-color: #f39c12; color: white;
 }
 .task-item .deadline { font-weight: 500; }
 .task-item .task-status { display: inline-block; padding: 3px 8px; border-radius: 20px; font-size: 0.75em; font-weight: 500; color: white; }
-.status-belum { background-color: var(--status-belum); color: var(--dark-color);}
+.status-belum { background-color: var(--status-belum); color: var(--dark-color);} /* Warna teks belum tetap gelap */
 .status-proses { background-color: var(--status-proses); }
 .status-selesai { background-color: var(--status-selesai); }
 .task-overdue .deadline { color: var(--status-overdue) !important; font-weight: 700; }
-.task-overdue::before { content: "Lewat Tenggat!"; position: absolute; top: -6px; right: -6px; background-color: var(--status-overdue); color: white; padding: 2px 6px; border-radius: 8px 0 8px 0; font-size: 0.7em; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.2); z-index: 1; }
+.task-overdue::before { content: "Lewat Tenggat!"; position: absolute; top: -6px; right: -6px; background-color: var(--status-overdue); color: white; padding: 2px 6px; border-radius: 8px 0 8px 0; font-size: 0.7em; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.3); z-index: 1; }
 .task-item .detail-preview { font-size: 0.9em; color: var(--secondary-color); margin-top: 8px; word-wrap: break-word; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .task-item .task-actions {
     margin-top:10px;
@@ -319,8 +458,8 @@ header button#openInputModalBtn:hover { background-color: #f39c12; color: white;
 
 .no-tasks { color: var(--secondary-color); text-align: center; padding: 25px 15px; font-size: 1em;}
 #pieChartContainer { max-width: 300px; margin: 15px auto; height: 280px; } /* Default size */
-.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.65); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 15px; }
-.modal-content { background-color: var(--card-bg-color); padding: 20px; border: none; width: 95%; max-width: 600px; border-radius: 15px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.15); animation: slideDownModal 0.4s ease-out; margin: auto; max-height: 90vh; overflow-y: auto; }
+.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 15px; } /* Latar belakang modal lebih gelap */
+.modal-content { background-color: var(--card-bg-color); padding: 20px; border: none; width: 95%; max-width: 600px; border-radius: 15px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: slideDownModal 0.4s ease-out; margin: auto; max-height: 90vh; overflow-y: auto; } /* Bayangan modal lebih gelap */
 #confirmDeleteModal .modal-content { max-width: 400px; }
 #confirmDeleteModal p { font-size: 1.05em; margin-bottom: 18px; text-align: center;}
 #confirmDeleteModal .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px;}
@@ -333,18 +472,18 @@ label, .detail-label { display: block; margin-bottom: 6px; font-weight: 500; col
 .detail-value { padding: 8px 10px; background-color: var(--light-color); border-radius: 8px; word-wrap: break-word; white-space: pre-wrap; border: 1px solid var(--border-color); font-size: 0.95em; color: var(--dark-color); }
 #attachmentPreviewArea { margin-top: 10px; padding: 12px; border: 1px dashed var(--border-color); min-height: 100px; max-height: 350px; overflow: auto; display: flex; justify-content: center; align-items: center; background-color: var(--light-color); border-radius: 8px; }
 #attachmentPreviewArea img, #attachmentPreviewArea iframe, #attachmentPreviewArea embed { max-width: 100%; max-height: 330px; display: block; margin: auto; border-radius: 4px; }
-#attachmentPreviewArea pre { white-space: pre-wrap; word-wrap: break-word; font-size: 0.9em; max-height: 330px; overflow-y: auto; width: 100%; padding: 8px; background-color: #fff; border: 1px solid var(--border-color); border-radius: 4px; }
-input[type="text"], input[type="date"], input[type="time"], textarea, select, input[type="file"] { width: 100%; padding: 10px 12px; box-sizing: border-box; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.95em; font-family: var(--font-family-sans-serif); background-color: #fff; color: var(--dark-color); transition: border-color 0.2s ease, box-shadow 0.2s ease; }
-input[type="text"]:focus, input[type="date"]:focus, input[type="time"]:focus, textarea:focus, select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 0.15rem rgba(0,123,255,.25); outline: none; }
-input[readonly] { background-color: #e9ecef; cursor: not-allowed; }
+#attachmentPreviewArea pre { white-space: pre-wrap; word-wrap: break-word; font-size: 0.9em; max-height: 330px; overflow-y: auto; width: 100%; padding: 8px; background-color: var(--light-color); border: 1px solid var(--border-color); border-radius: 4px; color: var(--dark-color); }
+input[type="text"], input[type="date"], input[type="time"], textarea, select, input[type="file"] { width: 100%; padding: 10px 12px; box-sizing: border-box; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.95em; font-family: var(--font-family-sans-serif); background-color: var(--light-color); color: var(--dark-color); transition: border-color 0.2s ease, box-shadow 0.2s ease; } /* Input form disesuaikan */
+input[type="text"]:focus, input[type="date"]:focus, input[type="time"]:focus, textarea:focus, select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 0.15rem rgba(59, 130, 246, .25); outline: none; } /* Warna fokus disesuaikan */
+input[readonly] { background-color: rgba(71, 85, 105, 0.2); cursor: not-allowed; } /* Warna readonly disesuaikan */
 .btn { padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95em; font-weight: 500; transition: all 0.2s ease; text-decoration: none; display: inline-block; }
 .btn-primary { background-color: var(--primary-color); color: white; }
-.btn-primary:hover { background-color: var(--primary-hover-color); transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
+.btn-primary:hover { background-color: var(--primary-hover-color); transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.2);}
 /* Tombol Tambah sudah di-style spesifik di header */
 .btn-danger { background-color: var(--status-overdue); color: white; }
-.btn-danger:hover { background-color: #c82333; transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
+.btn-danger:hover { background-color: #b91c1c; transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.2);}
 .btn-secondary { background-color: var(--secondary-color); color: white; }
-.btn-secondary:hover { background-color: #5a6268; transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
+.btn-secondary:hover { background-color: #6b7280; transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.2);}
 .btn-sm { font-size:0.8em; padding: 6px 12px; }
 form button[type="submit"] { width: 100%; margin-top: 8px;}
 .summary-stat { font-size: 1em; margin-bottom: 12px; color: var(--secondary-color); }
@@ -356,13 +495,13 @@ form button[type="submit"] { width: 100%; margin-top: 8px;}
 .justify-between { justify-content: space-between; }
 .align-items-center { align-items: center; }
 .task-list::-webkit-scrollbar { width: 6px; }
-.task-list::-webkit-scrollbar-track { background: var(--light-color); border-radius: 8px;}
-.task-list::-webkit-scrollbar-thumb { background: #ccc; border-radius: 8px;}
-.task-list::-webkit-scrollbar-thumb:hover { background: #aaa; }
+.task-list::-webkit-scrollbar-track { background: rgba(71, 85, 105, 0.2); border-radius: 8px;} /* Scrollbar disesuaikan */
+.task-list::-webkit-scrollbar-thumb { background: #6b7280; border-radius: 8px;} /* Scrollbar disesuaikan */
+.task-list::-webkit-scrollbar-thumb:hover { background: #4b5563; }
 .export-controls {
     margin-top: 15px;
     padding:12px;
-    background-color: #e9ecef;
+    background-color: var(--card-bg-color); /* Latar belakang kontrol ekspor disesuaikan */
     border-radius: 8px;
     display: flex;
     flex-direction: column; /* Default ke kolom */
@@ -371,7 +510,7 @@ form button[type="submit"] { width: 100%; margin-top: 8px;}
 }
 .export-controls > div { display: flex; flex-direction: column; width: 100%; }
 .export-controls label { margin-bottom: 4px; font-size: 0.85em;}
-.export-controls select, .export-controls button { width: 100%; padding: 8px 12px; font-size: 0.9em; }
+.export-controls select, .export-controls button { width: 100%; padding: 8px 12px; font-size: 0.9em; background-color: var(--light-color); color: var(--dark-color); } /* Input/select disesuaikan */
 
 .calendar-controls {
     display: flex;
@@ -381,24 +520,24 @@ form button[type="submit"] { width: 100%; margin-top: 8px;}
     padding: 8px 0;
     border-bottom: 1px solid var(--border-color);
 }
-.calendar-controls h3 { font-size: 1.2em; min-width: auto; order: -1; text-align: center; margin:0 0 8px 0;}
+.calendar-controls h3 { font-size: 1.2em; min-width: auto; order: -1; text-align: center; margin:0 0 8px 0; color: var(--dark-color);} /* Warna teks disesuaikan */
 .calendar-controls .btn-sm { width: 100%; padding: 8px; font-size: 0.9em; }
 .calendar-view table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 .calendar-view th, .calendar-view td { padding: 4px; height: 70px; font-size: 0.8em; border: 1px solid var(--border-color); text-align: left; vertical-align: top;}
-.calendar-view th { background-color: #e9ecef; text-align: center; font-weight: 600; padding: 8px 3px; color: var(--secondary-color); }
+.calendar-view th { background-color: rgba(71, 85, 105, 0.2); text-align: center; font-weight: 600; padding: 8px 3px; color: var(--secondary-color); } /* Header kalender disesuaikan */
 .calendar-view .date-number { font-weight: 600; font-size: 0.9em; display: block; margin-bottom: 3px; color: var(--dark-color); }
-.calendar-view .today .date-number { color: var(--primary-color); background-color: #e6f2ff; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; padding: 1px; box-shadow: 0 0 3px var(--primary-color); }
-.calendar-view .other-month .date-number { color: #adb5bd; }
-.calendar-view .other-month { background-color: #fdfdfd; }
+.calendar-view .today .date-number { color: var(--primary-color); background-color: rgba(59, 130, 246, 0.2); border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; padding: 1px; box-shadow: 0 0 3px var(--primary-color); } /* Warna 'hari ini' disesuaikan */
+.calendar-view .other-month .date-number { color: #475569; } /* Warna angka bulan lain disesuaikan */
+.calendar-view .other-month { background-color: rgba(30, 41, 59, 0.5); } /* Latar belakang bulan lain disesuaikan */
 .calendar-tasks-wrapper { max-height: 35px; overflow-y: auto; }
-.calendar-task { font-size: 0.75em; padding: 2px 4px; margin-bottom: 2px; border-radius: 3px; background-color: var(--light-color); border-left: 2px solid var(--secondary-color); cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background-color 0.2s ease; }
-.calendar-task:hover { background-color: #e9ecef; }
+.calendar-task { font-size: 0.75em; padding: 2px 4px; margin-bottom: 2px; border-radius: 3px; background-color: rgba(71, 85, 105, 0.2); border-left: 2px solid var(--secondary-color); cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background-color 0.2s ease; } /* Tugas kalender disesuaikan */
+.calendar-task:hover { background-color: rgba(71, 85, 105, 0.4); }
 .calendar-task.status-belum { border-left-color: var(--status-belum); }
 .calendar-task.status-proses { border-left-color: var(--status-proses); }
 .calendar-task.status-selesai { border-left-color: var(--status-selesai); text-decoration: line-through; opacity: 0.6; }
-.calendar-task.task-overdue { border-left-color: var(--status-overdue); font-weight: 500; background-color: #ffebee; }
+.calendar-task.task-overdue { border-left-color: var(--status-overdue); font-weight: 500; background-color: rgba(239, 68, 68, 0.2); } /* Warna overdue disesuaikan */
 
-small.validation-message { font-size: 0.8em; margin-top: 4px; display: block; }
+small.validation-message { font-size: 0.8em; margin-top: 4px; display: block; color: var(--status-overdue);}
 
 /* Responsive Media Queries untuk layar lebih besar */
 @media (min-width: 600px) {
@@ -416,6 +555,19 @@ small.validation-message { font-size: 0.8em; margin-top: 4px; display: block; }
 
     .dashboard-section { padding: 20px; }
     .dashboard-section h2 { font-size: 1.4em; }
+
+    /* Penyesuaian untuk layar yang lebih besar pada Quote Section */
+    .quote-section {
+        padding: 25px;
+    }
+    .quote-section h2 {
+        font-size: 1.6em;
+    }
+    #dailyQuote {
+        font-size: 1.2em;
+        padding: 0 15px;
+    }
+
 
     /* Elemen header section kembali ke horizontal */
     .dashboard-section-header { flex-direction: row; align-items: center; }
@@ -474,6 +626,7 @@ small.validation-message { font-size: 0.8em; margin-top: 4px; display: block; }
     width: 100%;
     max-width: 400px; /* Lebar maksimum untuk modal auth */
     text-align: center;
+    color: var(--dark-color); /* Warna teks untuk kontainer auth */
 }
 .auth-container h2 {
     color: var(--primary-color);
@@ -494,7 +647,7 @@ small.validation-message { font-size: 0.8em; margin-top: 4px; display: block; }
     color: white;
 }
 .auth-container .btn-secondary:hover {
-    background-color: #5a6268;
+    background-color: #6b7280;
 }
 #authMessage.validation-message {
     padding: 10px;
@@ -503,8 +656,8 @@ small.validation-message { font-size: 0.8em; margin-top: 4px; display: block; }
     display: none;
     text-align: center;
 }
-#authMessage.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-#authMessage.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+#authMessage.success { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; } /* Warna sukses disesuaikan */
+#authMessage.error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; } /* Warna error disesuaikan */
 
 /* Media queries for smaller screens for auth modal */
 @media (max-width: 480px) {
