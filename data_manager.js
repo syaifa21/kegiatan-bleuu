@@ -1,32 +1,94 @@
 // data_manager.js
-// Mengarahkan semua permintaan ke satu file API terpusat: api-kerjaan.php
-const API_BASE_URL = '/api/api-kerjaan.php';
+// Mengarahkan semua permintaan CRUD tugas ke API terpusat yang sudah terhubung ke DB.
+
+const API_BASE_URL = '/api/api-kerjaan.php'; // API untuk tugas
+const API_AUTH_URL = '/api/api-auth.php';   // API untuk autentikasi
 
 const DataManager = {
+    // Fungsi autentikasi
+    authenticate: async function(action, username, password) {
+        try {
+            const response = await fetch(API_AUTH_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ action, username, password })
+            });
+            return await response.json();
+        } catch (error) {
+            console.error(`Error during ${action} request:`, error);
+            return { status: 'error', message: 'Terjadi kesalahan saat berkomunikasi dengan server.' };
+        }
+    },
+
+    // Fungsi cek sesi
+    checkSession: async function() {
+        try {
+            const response = await fetch(API_AUTH_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ action: 'check_session' })
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('Error checking session:', error);
+            return { status: 'error', message: 'Terjadi kesalahan saat berkomunikasi dengan server.' };
+        }
+    },
+
+    // Fungsi logout
+    logout: async function() {
+        try {
+            const response = await fetch(API_AUTH_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ action: 'logout' })
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('Error during logout:', error);
+            return { status: 'error', message: 'Terjadi kesalahan saat logout.' };
+        }
+    },
+
+    // Fungsi untuk mendapatkan daftar tugas dari API
     getKerjaanList: async function() {
         try {
             const response = await fetch(API_BASE_URL, {
-                method: 'GET' // Menggunakan metode GET
+                method: 'GET'
             });
             if (!response.ok) {
-                console.error("Server error:", response.status, await response.text());
-                const errorResult = await response.json();
-                throw new Error(errorResult.message || 'Gagal mengambil data tugas dari server.');
+                const errorText = await response.text();
+                console.error("Server error (getKerjaanList):", response.status, errorText);
+                try {
+                    const errorResult = JSON.parse(errorText);
+                    throw new Error(errorResult.message || 'Gagal mengambil data tugas dari server.');
+                } catch (parseError) {
+                    throw new Error(`Gagal mengambil data tugas. Server merespon dengan status ${response.status} dan teks: ${errorText}`);
+                }
             }
             const data = await response.json();
             return data;
         } catch (error) {
             console.error("Error fetching list:", error);
-            // alert('Tidak dapat memuat daftar kerjaan: ' + error.message);
+            // alert('Tidak dapat memuat daftar kerjaan: ' + error.message); // Komentar ini tetap bagus untuk dev
             return [];
         }
     },
 
+    // Fungsi untuk mendapatkan tugas berdasarkan ID (jarang dipakai langsung, tapi bisa)
     getKerjaanById: async function(id) {
         const kerjaanList = await this.getKerjaanList();
-        return kerjaanList.find(k => k.id === id);
+        // Karena ID sekarang dari DB (INT), pastikan perbandingannya string atau number
+        return kerjaanList.find(k => k.id == id); // Gunakan == untuk loose comparison
     },
 
+    // Fungsi untuk menyimpan atau memperbarui tugas
     saveOrUpdateKerjaan: async function(taskData, lampiranFileObject) {
         try {
             const formData = new FormData();
@@ -54,6 +116,7 @@ const DataManager = {
         }
     },
 
+    // Fungsi untuk menghapus tugas
     deleteKerjaanById: async function(id) {
         try {
             const response = await fetch(API_BASE_URL, {

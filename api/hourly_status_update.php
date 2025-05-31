@@ -3,19 +3,18 @@
 // Deskripsi: Mengirim update per jam ke Telegram mengenai tugas yang masih 'proses' atau 'belum'.
 // Dijalankan oleh CRON JOB setiap jam.
 
-require_once __DIR__ . '/../data_manager_direct.php';
 require_once __DIR__ . '/telegram_helpers.php';
 
 date_default_timezone_set('Asia/Jakarta');
 
-$BOT_TOKEN_NOTIF = '7239871766:AAHWW70f_tuYhmFDC5LSgoUfGCv36VPnkVs';
+$BOT_TOKEN_NOTIF = '7239871766:AAHWW70f_tuYhmFDC5LSgoUfGCv37VPnkVs';
 $scriptExecutionTime = date('Y-m-d H:i:s');
 
 try {
-    $allMasterTasks = DataManagerDirect::getKerjaanList();
-    
+    $allMasterTasks = getTasksFromDb(); // Mengambil semua tugas dari database
+
     if ($allMasterTasks === null) {
-        error_log("HourlyStatusUpdate ($scriptExecutionTime): Gagal memuat tugas dari DataManagerDirect. Keluar.");
+        error_log("HourlyStatusUpdate ($scriptExecutionTime): Gagal memuat tugas dari DB. Keluar.");
         exit("Gagal memuat master tugas.");
     }
     if (empty($allMasterTasks)) {
@@ -29,7 +28,6 @@ try {
 
     foreach ($allMasterTasks as $task) {
         if (isset($task['status']) && $task['status'] !== 'selesai') {
-            // Hapus logika perulangan jika ada
             
             if ($task['status'] === 'proses') {
                 $tasksProses[] = $task;
@@ -40,15 +38,14 @@ try {
     }
 
     if (empty($tasksProses) && empty($tasksBelum)) {
-        $messageNoTasks = "🕒 *Update Kerjaan Jam " . date('H:00') . "*\n\n";
-        $messageNoTasks .= "👍 Tidak ada tugas yang sedang diproses atau belum dikerjakan saat ini.";
+        $messageNoTasks = " hourly_status_update ($scriptExecutionTime): Tidak ada tugas 'proses' atau 'belum' untuk dilaporkan.";
         
         $sendIfEmpty = false;
         if ($sendIfEmpty) {
             $subscriberChatIds = getSubscriberChatIds();
             if (!empty($subscriberChatIds)) {
                 foreach ($subscriberChatIds as $chatId) {
-                    sendTelegramMessage($BOT_TOKEN_NOTIF, $chatId, $messageNoTasks, "Markdown");
+                    // sendTelegramMessage($BOT_TOKEN_NOTIF, $chatId, $messageNoTasks, "Markdown");
                 }
             }
         }
@@ -57,20 +54,20 @@ try {
     }
 
     $currentTimeFormatted = date('H:00');
-    $message = "🕒 *Update Kerjaan Jam " . $currentTimeFormatted . "* 🕒\n\n";
+    $message = "🔔 *UPDATE HARIAN KERJAAN JAM " . $currentTimeFormatted . "* 🔔\n\n";
     $hasContent = false;
 
     if (!empty($tasksProses)) {
         $hasContent = true;
-        $message .= "📝 *Tugas Dalam Proses Saat Ini (" . count($tasksProses) . ")*:\n";
+        $message .= "⚙️ *Tugas Dalam Proses Saat Ini (" . count($tasksProses) . ")*:\n";
         foreach ($tasksProses as $task) {
             $taskName = htmlspecialchars($task['nama'] ?? 'Tanpa Nama');
             $deadlineText = "";
             if (!empty($task['tenggatDisplay'])) {
-                $deadlineText = " (Tenggat: " . htmlspecialchars($task['tenggatDisplay']) . ")";
+                $deadlineText = " (Tenggat: " . htmlspecialchars($task['tenggatDisplay']) . " ⏰)";
             }
-            // Hapus $recurringText
-            $message .= "- " . $taskName . $deadlineText . "\n";
+            $userName = getUsernameById($task['user_id'] ?? null); // Ambil nama pengguna tugas ini
+            $message .= "» " . $taskName . $deadlineText . "\n   _Pemilik: {$userName}_\n";
         }
         $message .= "\n";
     }
@@ -82,10 +79,10 @@ try {
             $taskName = htmlspecialchars($task['nama'] ?? 'Tanpa Nama');
             $deadlineText = "";
             if (!empty($task['tenggatDisplay'])) {
-                $deadlineText = " (Tenggat: " . htmlspecialchars($task['tenggatDisplay']) . ")";
+                $deadlineText = " (Tenggat: " . htmlspecialchars($task['tenggatDisplay']) . " ⏰)";
             }
-            // Hapus $recurringText
-            $message .= "- " . $taskName . $deadlineText . "\n";
+            $userName = getUsernameById($task['user_id'] ?? null); // Ambil nama pengguna tugas ini
+            $message .= "» " . $taskName . $deadlineText . "\n   _Pemilik: {$userName}_\n";
         }
         $message .= "\n";
     }
@@ -102,9 +99,12 @@ try {
         error_log("HourlyStatusUpdate ($scriptExecutionTime): Tidak ada subscriber untuk dikirimi notifikasi.");
         exit("Tidak ada subscriber.");
     }
+    
+    // Tambahkan bingkai ke pesan keseluruhan
+    $framedMessage = createFancyBorder($message, 50); // Sesuaikan lebar jika perlu
 
     foreach ($subscriberChatIds as $chatId) {
-        sendTelegramMessage($BOT_TOKEN_NOTIF, $chatId, $message, "Markdown");
+        sendTelegramMessage($BOT_TOKEN_NOTIF, $chatId, $framedMessage);
     }
     error_log("HourlyStatusUpdate ($scriptExecutionTime): Pesan update dikirim ke " . count($subscriberChatIds) . " subscriber.");
 
@@ -114,4 +114,3 @@ try {
 }
 
 echo "Hourly status update script selesai pada $scriptExecutionTime\n";
-?>

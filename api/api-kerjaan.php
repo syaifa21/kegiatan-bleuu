@@ -1,107 +1,59 @@
 <?php
 // api/api-kerjaan.php
-// API ini melakukan operasi CRUD langsung pada file tasks.json.
-// Sinkronisasi ke DB akan dipicu secara asynchronous DAN oleh Cron Job terpisah.
 
 header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *'); // Sesuaikan untuk produksi jika perlu
+header('Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Access-Control-Allow-Credentials: true'); // Penting untuk mengizinkan cookie sesi
+
+// Tangani preflight request untuk CORS
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
+session_start(); // MULAI SESI DI SINI
+
 require_once __DIR__ . '/telegram_helpers.php'; // Digunakan untuk notifikasi Telegram
+require_once __DIR__ . '/db_connect.php'; // Dapatkan koneksi database
 
-$BOT_TOKEN_NOTIF = '7239871766:AAHWW70f_tuYhmFDC5LSgoUfGCv36VPnkVs';
-$tasksFile = __DIR__ . '/../data/tasks.json';
-$syncTriggerFile = __DIR__ . '/../data/sync_trigger.json'; // File trigger baru
-
-// Pastikan direktori data ada
-if (!file_exists(dirname($tasksFile))) {
-    mkdir(dirname($tasksFile), 0755, true);
-}
-// Pastikan file sync_trigger ada
-if (!file_exists($syncTriggerFile)) {
-    file_put_contents($syncTriggerFile, json_encode(["last_json_modified" => 0, "last_sync_completed" => 0]));
-}
-
+$BOT_TOKEN_NOTIF = '7239871766:AAHWW70f_tuYhmFDC5LSgoUfGCv37VPnkVs';
 
 $response = ['status' => 'error', 'message' => 'Terjadi kesalahan yang tidak diketahui.'];
-
-// Fungsi bantu untuk membaca/menulis JSON (sama seperti sebelumnya)
-function readTasksJson($filePath) {
-    if (!file_exists($filePath)) {
-        return [];
-    }
-    $jsonContent = file_get_contents($filePath);
-    if ($jsonContent === false) {
-        throw new Exception('Gagal membaca file data tugas.');
-    }
-    $tasks = json_decode($jsonContent, true);
-    if (json_last_error() !== JSON_ERROR_NONE && trim($jsonContent) !== '') {
-        throw new Exception('Gagal mem-parse format data tugas: ' . json_last_error_msg());
-    }
-    return $tasks ?: [];
-}
-
-function writeTasksJson($filePath, $tasksArray) {
-    $jsonDataToSave = json_encode(array_values($tasksArray), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-    if ($jsonDataToSave === false) {
-        throw new Exception('Gagal meng-encode data tugas ke JSON: ' . json_last_error_msg());
-    }
-    if (file_put_contents($filePath, $jsonDataToSave) === false) {
-        throw new Exception('Gagal menulis data ke file tasks.json.');
-    }
-    return true;
-}
-
-// Fungsi untuk memicu sinkronisasi secara asynchronous
-function triggerSyncAsync($syncScriptUrl, $syncTriggerFile) {
-    // Update timestamp di sync_trigger.json untuk menandai modifikasi JSON
-    // Menggunakan file locking sederhana untuk update trigger file
-    $fpTrigger = fopen($syncTriggerFile, 'c+');
-    if ($fpTrigger && flock($fpTrigger, LOCK_EX)) {
-        $triggerData = json_decode(stream_get_contents($fpTrigger), true) ?: ["last_json_modified" => 0, "last_sync_completed" => 0];
-        $triggerData["last_json_modified"] = microtime(true); // Waktu saat ini dalam detik dan mikrodetik
-        ftruncate($fpTrigger, 0);
-        rewind($fpTrigger);
-        fwrite($fpTrigger, json_encode($triggerData));
-        fflush($fpTrigger);
-        flock($fpTrigger, LOCK_UN);
-        fclose($fpTrigger);
-    } else {
-        error_log("Could not acquire lock or open sync_trigger.json for writing.");
-    }
-
-
-    // Memanggil skrip sinkronisasi tanpa menunggu respons (fire-and-forget)
-    $parts = parse_url($syncScriptUrl);
-    $host = $parts['host'];
-    $path = $parts['path'];
-    $port = isset($parts['port']) ? $parts['port'] : 80; // Default HTTP port for HTTP
-    if (isset($parts['scheme']) && $parts['scheme'] == 'https') {
-        $host = 'ssl://' . $host; // For HTTPS
-        $port = 443;
-    }
-
-
-    $fp = fsockopen($host, $port, $errno, $errstr, 1); // Timeout 1 detik
-    if (!$fp) {
-        error_log("Error triggering sync: $errstr ($errno) to $syncScriptUrl");
-        return false;
-    }
-
-    $out = "GET $path HTTP/1.1\r\n";
-    $out .= "Host: " . $parts['host'] . "\r\n"; // Use original host for HTTP header
-    $out .= "Connection: Close\r\n\r\n"; // Penting: Connection: Close agar tidak menunggu respons
-    fwrite($fp, $out);
-    fclose($fp); // Tutup koneksi segera
-    error_log("Sync trigger sent for URL: $syncScriptUrl");
-    return true;
-}
-
+$conn = null;
 
 try {
+    $conn = getDbConnection(); // Dapatkan koneksi database
+
+    // Cek user ID dari sesi
+    $userId = $_SESSION['user_id'] ?? null;
+    if (!$userId) {
+        http_response_code(401); // Unauthorized
+        throw new Exception('Akses ditolak. Anda harus login untuk melakukan aksi ini.');
+    }
+    
+    // Ambil username untuk notifikasi
+    $usernameLoggedIn = getUsernameById($userId);
+
     $method = $_SERVER['REQUEST_METHOD'];
     $input = json_decode(file_get_contents('php://input'), true);
 
     switch ($method) {
         case 'GET':
-            $tasks = readTasksJson($tasksFile);
+            // Ambil tugas HANYA untuk user yang sedang login
+            $stmt = $conn->prepare("SELECT id, nama, detail, status, tenggatDisplay, tenggatSortable, lampiranPath, lampiranNamaOriginal, createdAt FROM tasks WHERE user_id = ? ORDER BY createdAt DESC");
+            if ($stmt === false) { throw new Exception('Gagal mempersiapkan GET statement: ' . $conn->error); }
+            $stmt->bind_param("i", $userId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $tasks = [];
+            while ($row = $result->fetch_assoc()) {
+                // Pastikan ID dikonversi ke string jika diperlukan oleh frontend (opsional, karena ID di DB INT)
+                $row['id'] = (string)$row['id'];
+                $tasks[] = $row;
+            }
+            $stmt->close();
             $response = $tasks;
             break;
 
@@ -123,30 +75,33 @@ try {
             if (!is_dir($uploadsDir)) { if (!mkdir($uploadsDir, 0755, true)) { throw new Exception('Gagal membuat direktori uploads.'); }}
             if (!is_writable($uploadsDir)) { throw new Exception('Direktori uploads tidak dapat ditulis.'); }
 
-            $tasks = readTasksJson($tasksFile);
-            $isUpdate = false;
-            $taskId = $taskData['id'] ?? null;
-            $existingTaskIndex = -1;
+            // Ambil existing task dari DB
+            $existingTask = null;
+            $taskId = $taskData['id'] ?? null; // ID bisa string dari JS, pastikan cocok dengan INT di DB
             $previousTaskNameForNotif = "";
             $oldLampiranPath = null;
             $oldLampiranNamaOriginal = null;
 
             if ($taskId !== null) {
-                foreach ($tasks as $index => $task) {
-                    if (isset($task['id']) && $task['id'] == $taskId) {
-                        $existingTaskIndex = $index;
-                        $previousTaskNameForNotif = $task['nama'] ?? '';
-                        $oldLampiranPath = $task['lampiranPath'] ?? null;
-                        $oldLampiranNamaOriginal = $task['lampiranNamaOriginal'] ?? null;
-                        break;
-                    }
+                $stmt = $conn->prepare("SELECT id, nama, lampiranPath, lampiranNamaOriginal, createdAt FROM tasks WHERE id = ? AND user_id = ?");
+                if ($stmt === false) { throw new Exception('Gagal mempersiapkan cek tugas existing: ' . $conn->error); }
+                $stmt->bind_param("ii", $taskId, $userId); // ID task juga int di DB
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $existingTask = $result->fetch_assoc();
+                $stmt->close();
+
+                if ($existingTask) {
+                    $previousTaskNameForNotif = $existingTask['nama'] ?? '';
+                    $oldLampiranPath = $existingTask['lampiranPath'] ?? null;
+                    $oldLampiranNamaOriginal = $existingTask['lampiranNamaOriginal'] ?? null;
                 }
             }
 
             $lampiranPathBaru = null;
             $lampiranNamaOriginalBaru = null;
             if (isset($_FILES['lampiranFile']) && $_FILES['lampiranFile']['error'] == UPLOAD_ERR_OK) {
-                if ($existingTaskIndex > -1 && !empty($oldLampiranPath)) {
+                if ($existingTask && !empty($oldLampiranPath)) {
                     $fullOldPath = __DIR__ . '/../' . $oldLampiranPath;
                     if (file_exists($fullOldPath)) { if (!unlink($fullOldPath)) { error_log("Gagal menghapus file lampiran: " . $fullOldPath);}}
                 }
@@ -163,51 +118,60 @@ try {
             if ($lampiranPathBaru) {
                 $taskData['lampiranPath'] = $lampiranPathBaru;
                 $taskData['lampiranNamaOriginal'] = $lampiranNamaOriginalBaru;
-            } elseif ($existingTaskIndex > -1) {
+            } elseif ($existingTask) {
                 $taskData['lampiranPath'] = $oldLampiranPath;
                 $taskData['lampiranNamaOriginal'] = $oldLampiranNamaOriginal;
             } else {
                 $taskData['lampiranPath'] = $taskData['lampiranPath'] ?? null;
                 $taskData['lampiranNamaOriginal'] = $taskData['lampiranNamaOriginal'] ?? null;
             }
+            
+            // Siapkan data untuk DB
+            $nama = $taskData['nama'];
+            $detail = $taskData['detail'];
+            $status = $taskData['status'];
+            $tenggatDisplay = $taskData['tenggatDisplay'] ?? null;
+            $tenggatSortable = $taskData['tenggatSortable'] ?? null;
+            $lampiranPath = $taskData['lampiranPath'] ?? null;
+            $lampiranNamaOriginal = $taskData['lampiranNamaOriginal'] ?? null;
 
-            if ($existingTaskIndex > -1) {
-                $taskData['createdAt'] = $tasks[$existingTaskIndex]['createdAt'];
-                $tasks[$existingTaskIndex] = $taskData;
-                $isUpdate = true;
-                $notificationMessage = "📝 Tugas diperbarui:\n*" . htmlspecialchars($taskData['nama']) . "*";
+            if ($existingTask) {
+                // UPDATE tugas yang sudah ada
+                $stmt = $conn->prepare("UPDATE tasks SET nama=?, detail=?, status=?, tenggatDisplay=?, tenggatSortable=?, lampiranPath=?, lampiranNamaOriginal=? WHERE id=? AND user_id=?");
+                if ($stmt === false) { throw new Exception('Gagal mempersiapkan UPDATE statement: ' . $conn->error); }
+                $stmt->bind_param("sssssssii", $nama, $detail, $status, $tenggatDisplay, $tenggatSortable, $lampiranPath, $lampiranNamaOriginal, $taskId, $userId);
+                if (!$stmt->execute()) { throw new Exception('Gagal UPDATE tugas ID ' . $taskId . ': ' . $stmt->error); }
+                $stmt->close();
+                $notificationMessage = "✏️ *UPDATE TUGAS*\nUntuk *" . htmlspecialchars($usernameLoggedIn) . "*:\n";
+                $notificationMessage .= "Tugas diperbarui: *" . htmlspecialchars($taskData['nama']) . "*";
                 if ($previousTaskNameForNotif !== $taskData['nama']) { $notificationMessage .= "\n_(Nama lama: " . htmlspecialchars($previousTaskNameForNotif) . ")_"; }
             } else {
-                $taskData['id'] = $taskData['id'] ?: uniqid('task_', true);
-                $taskData['createdAt'] = $taskData['createdAt'] ?: date('c');
-                $tasks[] = $taskData;
-                $notificationMessage = "✨ Tugas baru ditambahkan:\n*" . htmlspecialchars($taskData['nama']) . "*";
+                // INSERT tugas baru
+                $createdAt = $taskData['createdAt'] ?? date('Y-m-d H:i:s');
+                $stmt = $conn->prepare("INSERT INTO tasks (user_id, nama, detail, status, tenggatDisplay, tenggatSortable, lampiranPath, lampiranNamaOriginal, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                if ($stmt === false) { throw new Exception('Gagal mempersiapkan INSERT statement: ' . $conn->error); }
+                $stmt->bind_param("issssssss", $userId, $nama, $detail, $status, $tenggatDisplay, $tenggatSortable, $lampiranPath, $lampiranNamaOriginal, $createdAt);
+                if (!$stmt->execute()) { throw new Exception('Gagal INSERT tugas: ' . $stmt->error); }
+                $taskData['id'] = $conn->insert_id; // Dapatkan ID yang baru saja diinsert
+                $stmt->close();
+                $notificationMessage = "✨ *TUGAS BARU DITAMBAHKAN*\nUntuk *" . htmlspecialchars($usernameLoggedIn) . "*:\n";
+                $notificationMessage .= "Tugas baru: *" . htmlspecialchars($taskData['nama']) . "*";
             }
             
-            writeTasksJson($tasksFile, $tasks); // Tulis perubahan ke JSON
-
-            // Panggil sinkronisasi setelah operasi POST berhasil
-            // Ganti URL ini dengan URL AKSES PUBLIK KE sync_json_to_db.php Anda
-            // Contoh: "http://yourdomain.com/api/sync_json_to_db.php" atau "https://bleauworks.my.id/api/sync_json_to_db.php"
-            $syncScriptUrl = "https://bleauworks.my.id/api/sync_json_to_db.php"; // <--- SESUAIKAN INI
-            triggerSyncAsync($syncScriptUrl, $syncTriggerFile);
-
             $response = ['status' => 'success', 'message' => 'Tugas berhasil disimpan.', 'task' => $taskData];
 
-            $statusTextNotif = "N/A";
-            switch($taskData['status']) {
-                case 'belum': $statusTextNotif = 'Belum Dikerjakan'; break;
-                case 'proses': $statusTextNotif = 'Proses'; break;
-                case 'selesai': $statusTextNotif = 'Selesai'; break;
-            }
-            $notificationMessage .= "\nStatus: " . htmlspecialchars($statusTextNotif);
-            if (!empty($taskData['tenggatDisplay'])) { $notificationMessage .= "\nTenggat: " . htmlspecialchars($taskData['tenggatDisplay']); }
+            $statusTextNotif = getStatusTextForTelegram($taskData['status']);
+            $notificationMessage .= "\nStatus: " . $statusTextNotif;
+            if (!empty($taskData['tenggatDisplay'])) { $notificationMessage .= "\nTenggat: " . htmlspecialchars($taskData['tenggatDisplay']) . " ⏰"; }
+            
+            // Tambahkan bingkai ke notifikasi
+            $framedNotification = createFancyBorder($notificationMessage);
 
             if (!empty($BOT_TOKEN_NOTIF)) {
                 $subscriberChatIds = getSubscriberChatIds();
                 if (!empty($subscriberChatIds)) {
                     foreach ($subscriberChatIds as $subscriberChatId) {
-                        sendTelegramMessage($BOT_TOKEN_NOTIF, $subscriberChatId, $notificationMessage);
+                        sendTelegramMessage($BOT_TOKEN_NOTIF, $subscriberChatId, $framedNotification);
                     }
                     error_log("Notifikasi perubahan data dikirim ke " . count($subscriberChatIds) . " pelanggan.");
                 }
@@ -218,44 +182,43 @@ try {
             $taskId = $input['id'] ?? null;
             if (!$taskId) { http_response_code(400); throw new Exception('ID Tugas tidak ditemukan.');}
 
-            $tasks = readTasksJson($tasksFile);
+            // Cari tugas yang akan dihapus untuk mengambil path lampiran
             $taskToDelete = null;
-            $taskDeletedName = "Sebuah tugas";
-            $initialTaskCount = count($tasks);
+            $stmt = $conn->prepare("SELECT id, nama, lampiranPath FROM tasks WHERE id = ? AND user_id = ?");
+            if ($stmt === false) { throw new Exception('Gagal mempersiapkan select tugas untuk delete: ' . $conn->error); }
+            $stmt->bind_param("ii", $taskId, $userId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $taskToDelete = $result->fetch_assoc();
+            $stmt->close();
 
-            $tasksUpdated = array_filter($tasks, function($task) use ($taskId, &$taskToDelete, &$taskDeletedName) {
-                if (isset($task['id']) && $task['id'] == $taskId) {
-                    $taskToDelete = $task; $taskDeletedName = $task['nama'] ?? $taskDeletedName; return false;
-                }
-                return true;
-            });
-
-            if ($initialTaskCount === count($tasksUpdated)) { http_response_code(404); throw new Exception('Tugas dengan ID tersebut tidak ditemukan untuk dihapus.');}
+            if (!$taskToDelete) { http_response_code(404); throw new Exception('Tugas dengan ID tersebut tidak ditemukan atau Anda tidak memiliki izin untuk menghapusnya.');}
+            
+            // Hapus dari database
+            $stmt = $conn->prepare("DELETE FROM tasks WHERE id = ? AND user_id = ?");
+            if ($stmt === false) { throw new Exception('Gagal mempersiapkan DELETE statement: ' . $conn->error); }
+            $stmt->bind_param("ii", $taskId, $userId);
+            if (!$stmt->execute()) { throw new Exception('Gagal DELETE tugas ID ' . $taskId . ': ' . $stmt->error); }
+            $stmt->close();
 
             if ($taskToDelete && !empty($taskToDelete['lampiranPath'])) {
                 $attachmentFilePath = __DIR__ . '/../' . $taskToDelete['lampiranPath'];
                 if (file_exists($attachmentFilePath)) { if (!unlink($attachmentFilePath)) { error_log("Gagal menghapus file lampiran: " . $attachmentFilePath);}}
             }
             
-            writeTasksJson($tasksFile, $tasksUpdated); // Tulis perubahan ke JSON
-
-            // Panggil sinkronisasi setelah operasi DELETE berhasil
-            // Ganti URL ini dengan URL AKSES PUBLIK KE sync_json_to_db.php Anda
-            // Contoh: "http://yourdomain.com/api/sync_json_to_db.php" atau "https://bleauworks.my.id/api/sync_json_to_db.php"
-            $syncScriptUrl = "https://bleauworks.my.id/api/sync_json_to_db.php"; // <--- SESUAIKAN INI
-            triggerSyncAsync($syncScriptUrl, $syncTriggerFile);
-
-
             $response = ['status' => 'success', 'message' => 'Tugas berhasil dihapus.'];
             
             if (!empty($BOT_TOKEN_NOTIF)) {
                 $subscriberChatIds = getSubscriberChatIds();
                 if (!empty($subscriberChatIds)) {
-                    $notificationMessage = "🗑️ Tugas dihapus:\n*" . htmlspecialchars($taskDeletedName) . "*";
+                    $notificationMessage = "🗑️ *TUGAS DIHAPUS*\nOleh *" . htmlspecialchars($usernameLoggedIn) . "*:\n";
+                    $notificationMessage .= "Tugas dihapus: *" . htmlspecialchars($taskToDelete['nama']) . "*";
+                    // Tambahkan bingkai ke notifikasi
+                    $framedNotification = createFancyBorder($notificationMessage);
                     foreach ($subscriberChatIds as $subscriberChatId) {
-                        sendTelegramMessage($BOT_TOKEN_NOTIF, $subscriberChatId, $notificationMessage);
+                        sendTelegramMessage($BOT_TOKEN_NOTIF, $subscriberChatId, $framedNotification);
                     }
-                    error_log("Notifikasi penghapusan data dikirim ke " . count($subscriberChatIds) . " pelanggan untuk tugas: " . $taskDeletedName);
+                    error_log("Notifikasi penghapusan data dikirim ke " . count($subscriberChatIds) . " pelanggan untuk tugas: " . $taskToDelete['nama']);
                 } else {
                     error_log("Tidak ada pelanggan untuk notifikasi data.");
                 }
@@ -272,7 +235,9 @@ try {
     $response = ['status' => 'error', 'message' => $e->getMessage()];
     error_log("Error in api-kerjaan.php: " . $e->getMessage());
 } finally {
-    // Tidak ada koneksi DB yang perlu ditutup di sini lagi
+    if ($conn) {
+        $conn->close();
+    }
 }
 
 echo json_encode($response);
