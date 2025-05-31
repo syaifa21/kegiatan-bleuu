@@ -16,21 +16,51 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-body {
-    font-family: var(--font-family-sans-serif); margin: 0;
-    background-color: var(--light-color); color: var(--dark-color);
-    line-height: 1.6; font-size: 15px;
-    -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;
+
+/* Mencegah scroll horizontal yang tidak diinginkan */
+html, body {
+    overflow-x: hidden;
+    /* Optional: Atur min-width pada body jika ada elemen yang sering menyebabkan overflow horizontal, 
+       namun lebih baik perbaiki elemen penyebabnya */
+    /* min-width: 320px; */ 
 }
-.container { width: 100%; padding: 0 10px; margin: 10px auto; }
+
+body {
+    font-family: var(--font-family-sans-serif);
+    margin: 0;
+    background-color: var(--light-color);
+    color: var(--dark-color);
+    line-height: 1.6;
+    font-size: 15px;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+}
+
+/* Container utama yang responsif */
+.container {
+    width: 100%;
+    padding: 0 10px; /* Padding default yang moderat */
+    margin: 10px auto;
+}
 
 header {
     background: linear-gradient(120deg, hsl(210, 80%, 55%) 0%, hsl(220, 70%, 45%) 100%);
-    color: white; padding: 20px 25px; border-radius: 16px; margin-bottom: 30px;
-    display: flex; justify-content: space-between; align-items: center;
-    flex-wrap: wrap; gap: 20px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-    position: sticky; top: 10px; z-index: 999; transition: box-shadow 0.3s ease;
+    color: white;
+    padding: 20px 25px;
+    border-radius: 16px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 10px;
+    z-index: 999;
+    transition: box-shadow 0.3s ease;
 }
+
 .header-title-group { flex-grow: 1; }
 header #greetingMessage { margin: 0; font-size: 1.9em; font-weight: 700; line-height: 1.2; }
 header #liveClock { font-size: 2em; font-weight: 400; color: rgba(255, 255, 255, 0.85); margin-top: 4px; letter-spacing: 0.5px; }
@@ -43,38 +73,232 @@ header #liveClock::before { content: "🕒 "; margin-right: 6px; opacity: 0.8; }
 header button#openInputModalBtn { background-color: #f1c40f; color: var(--dark-color); border: none; font-weight: 600; padding: 10px 20px; font-size: 0.9em; border-radius: 8px; box-shadow: 0 3px 7px rgba(0,0,0,0.15); transition: background-color 0.25s ease, transform 0.2s ease, box-shadow 0.2s ease; }
 header button#openInputModalBtn:hover { background-color: #f39c12; color: white; transform: translateY(-2px) scale(1.02); box-shadow: 0 5px 10px rgba(0,0,0,0.2); }
 
+/* MEDIA QUERIES UNTUK LAYAR SEDANG (misal tablet dalam mode portrait) */
 @media (max-width: 880px) {
-    header { flex-direction: column; align-items: center; gap: 15px; padding: 15px 20px; }
-    .header-title-group { width: 100%; text-align: center; }
+    header {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        padding: 15px 20px;
+        margin-bottom: 20px; /* Sedikit lebih ringkas */
+    }
+    .header-title-group {
+        width: 100%;
+        text-align: center;
+    }
     header #greetingMessage { font-size: 1.7em; }
-    .header-actions { width: 100%; flex-direction: column; align-items: stretch; gap: 12px; }
+    .header-actions {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch; /* Tombol mengisi lebar */
+        gap: 12px;
+    }
     .navigation-tabs { justify-content: center; width: 100%; }
     header button#openInputModalBtn { width: 100%; }
-}
- @media (max-width: 480px) {
-     header #greetingMessage { font-size: 1.5em; } header #liveClock { font-size: 0.9em; }
-     .navigation-tabs .btn { font-size: 0.8em; padding: 6px 10px;}
-     header button#openInputModalBtn { font-size: 0.9em; padding: 10px 15px; }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr; /* Pastikan satu kolom */
+        gap: 15px;
+    }
+    .dashboard-section {
+        padding: 15px; /* Padding lebih ringkas */
+    }
+
+    /* Penyesuaian untuk Ringkasan Umum dan Tenggat < 7 Hari */
+    #pieChartContainer {
+        max-width: 250px; /* Batasi lebar maksimum grafik pie */
+        height: 250px;
+        margin: 15px auto; /* Pusatkan */
+    }
+    #nearestDeadlineTasks {
+        max-height: 250px; /* Batasi tinggi daftar */
+        overflow-y: auto; /* Aktifkan scroll */
+    }
+
+    /* Penyesuaian elemen di dalam section */
+    .dashboard-section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .filter-controls {
+        flex-direction: column;
+        width: 100%;
+        gap: 8px;
+    }
+    .filter-controls > div {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .filter-controls label {
+        margin-bottom: 5px;
+        margin-right: 0;
+    }
+    .filter-controls select {
+        width: 100%;
+    }
+    .task-item .task-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    .task-item .task-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 5px !important;
+    }
+    .task-item .task-actions .btn {
+        width: 100%;
+    }
+    .export-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    .export-controls > div {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .export-controls label {
+        margin-bottom: 5px;
+        margin-right: 0;
+    }
+    .export-controls select,
+    .export-controls button {
+        width: 100%;
+    }
+    .calendar-controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .calendar-controls h3 {
+        order: -1;
+        text-align: center;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    .calendar-controls .btn-sm {
+        width: 100%;
+    }
 }
 
-.dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+/* MEDIA QUERIES UNTUK LAYAR SANGAT KECIL (misal mobile phone) */
+@media (max-width: 480px) {
+    .container {
+        padding: 0 10px; /* Padding yang lebih ketat */
+        margin: 5px auto;
+    }
+    header #greetingMessage { font-size: 1.5em; }
+    header #liveClock { font-size: 0.9em; }
+    .navigation-tabs .btn { font-size: 0.8em; padding: 6px 10px;}
+    header button#openInputModalBtn { font-size: 0.9em; padding: 10px 15px; }
+
+    /* Ringkasan Umum lebih compact */
+    #pieChartContainer {
+        max-width: 180px; /* Lebih kecil lagi */
+        height: 180px;
+    }
+    .summary-stat strong {
+        font-size: 1.5em; /* Ukuran font lebih kecil untuk angka statistik */
+    }
+
+    /* Modal dan Form Input */
+    .modal-content {
+        padding: 15px; /* Padding modal lebih ringkas */
+        width: 98%; /* Memastikan hampir memenuhi lebar layar */
+    }
+    .modal-content h2 {
+        font-size: 1.2em;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        padding: 8px 10px; /* Padding input lebih ringkas */
+        font-size: 0.85em; /* Font input lebih kecil */
+    }
+    .btn {
+        padding: 8px 12px; /* Padding tombol umum lebih ringkas */
+        font-size: 0.85em;
+    }
+    form button[type="submit"] {
+        padding: 10px; /* Tombol submit form agar lebih besar */
+        font-size: 0.9em;
+    }
+
+    /* Spesifik untuk modal auth */
+    .auth-container {
+        padding: 15px;
+        max-width: 95%; /* Agak lebih kecil */
+    }
+    .auth-container h2 {
+        font-size: 1.4em;
+    }
+    .auth-container .btn {
+        padding: 9px 14px;
+        font-size: 0.88em;
+    }
+}
+
+
+/* Bagian Dashboard Grid - Default */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Kolom adaptif */
+    gap: 15px;
+}
 .app-section { display: none; }
-.app-section.active { display: block; animation: fadeInSection 0.5s ease-out; }
+.app-section.active { animation: fadeInSection 0.5s ease-out; display: block; } /* Pastikan display: block */
 @keyframes fadeInSection { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-.dashboard-section { background-color: var(--card-bg-color); padding: 15px; border-radius: 12px; box-shadow: 0 6px 20px var(--shadow-color); }
-.dashboard-section-header { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+.dashboard-section {
+    background-color: var(--card-bg-color);
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px var(--shadow-color);
+}
+.dashboard-section-header {
+    display: flex;
+    flex-direction: column; /* Default ke kolom untuk konsistensi */
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+}
 .dashboard-section-header h2 { margin: 0; color: var(--primary-color); font-size: 1.3em; font-weight: 600; }
-.filter-controls { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+.filter-controls {
+    width: 100%;
+    display: flex;
+    flex-direction: column; /* Default ke kolom */
+    gap: 8px;
+}
 .filter-controls > div { display: flex; flex-direction: column;}
 .filter-controls label { margin-bottom: 4px; font-weight: 500; color: var(--secondary-color); font-size: 0.9em;}
 .filter-controls select { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.9em; background-color: #fff;}
 
 .task-list { list-style-type: none; padding: 0; max-height: 400px; overflow-y: auto; }
-.task-item { background-color: #fff; border: 1px solid var(--border-color); padding: 12px 15px; margin-bottom: 10px; border-radius: 10px; cursor: pointer; transition: all 0.2s ease-out; box-shadow: 0 3px 6px rgba(0,0,0,0.05); position: relative; }
+.task-item {
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease-out;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+    position: relative;
+}
 .task-item:hover { border-left: 5px solid var(--primary-color); padding-left: 10px; box-shadow: 0 5px 12px rgba(0,0,0,0.08); transform: translateX(2px); }
 .task-item strong { display: block; font-size: 1.05em; font-weight: 600; color: var(--dark-color); margin-bottom: 6px; }
-.task-item .task-meta { font-size: 0.85em; color: var(--secondary-color); margin-bottom: 6px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.task-item .task-meta {
+    font-size: 0.85em;
+    color: var(--secondary-color);
+    margin-bottom: 6px;
+    display: flex;
+    flex-direction: column; /* Default ke kolom */
+    align-items: flex-start;
+    gap: 4px;
+}
 .task-item .deadline { font-weight: 500; }
 .task-item .task-status { display: inline-block; padding: 3px 8px; border-radius: 20px; font-size: 0.75em; font-weight: 500; color: white; }
 .status-belum { background-color: var(--status-belum); color: var(--dark-color);}
@@ -83,12 +307,18 @@ header button#openInputModalBtn:hover { background-color: #f39c12; color: white;
 .task-overdue .deadline { color: var(--status-overdue) !important; font-weight: 700; }
 .task-overdue::before { content: "Lewat Tenggat!"; position: absolute; top: -6px; right: -6px; background-color: var(--status-overdue); color: white; padding: 2px 6px; border-radius: 8px 0 8px 0; font-size: 0.7em; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.2); z-index: 1; }
 .task-item .detail-preview { font-size: 0.9em; color: var(--secondary-color); margin-top: 8px; word-wrap: break-word; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-.task-item .task-actions { margin-top:10px; display: flex; flex-direction: column; gap: 8px !important; align-items: stretch; }
+.task-item .task-actions {
+    margin-top:10px;
+    display: flex;
+    flex-direction: column; /* Default ke kolom */
+    gap: 8px !important;
+    align-items: stretch;
+}
 .task-item .task-actions .btn { width: 100%; text-align: center; }
 .task-item .recurrence-info { font-size: 0.75em; color: var(--primary-color); font-style: italic; margin-top: 4px; }
 
 .no-tasks { color: var(--secondary-color); text-align: center; padding: 25px 15px; font-size: 1em;}
-#pieChartContainer { max-width: 300px; margin: 15px auto; height: 280px; }
+#pieChartContainer { max-width: 300px; margin: 15px auto; height: 280px; } /* Default size */
 .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.65); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 15px; }
 .modal-content { background-color: var(--card-bg-color); padding: 20px; border: none; width: 95%; max-width: 600px; border-radius: 15px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.15); animation: slideDownModal 0.4s ease-out; margin: auto; max-height: 90vh; overflow-y: auto; }
 #confirmDeleteModal .modal-content { max-width: 400px; }
@@ -129,12 +359,28 @@ form button[type="submit"] { width: 100%; margin-top: 8px;}
 .task-list::-webkit-scrollbar-track { background: var(--light-color); border-radius: 8px;}
 .task-list::-webkit-scrollbar-thumb { background: #ccc; border-radius: 8px;}
 .task-list::-webkit-scrollbar-thumb:hover { background: #aaa; }
-.export-controls { margin-top: 15px; padding:12px; background-color: #e9ecef; border-radius: 8px; display: flex; flex-direction: column; gap: 8px; align-items: stretch;}
+.export-controls {
+    margin-top: 15px;
+    padding:12px;
+    background-color: #e9ecef;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column; /* Default ke kolom */
+    gap: 8px;
+    align-items: stretch;
+}
 .export-controls > div { display: flex; flex-direction: column; width: 100%; }
 .export-controls label { margin-bottom: 4px; font-size: 0.85em;}
 .export-controls select, .export-controls button { width: 100%; padding: 8px 12px; font-size: 0.9em; }
 
-.calendar-controls { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; padding: 8px 0; border-bottom: 1px solid var(--border-color); }
+.calendar-controls {
+    display: flex;
+    flex-direction: column; /* Default ke kolom */
+    gap: 8px;
+    margin-bottom: 15px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-color);
+}
 .calendar-controls h3 { font-size: 1.2em; min-width: auto; order: -1; text-align: center; margin:0 0 8px 0;}
 .calendar-controls .btn-sm { width: 100%; padding: 8px; font-size: 0.9em; }
 .calendar-view table { width: 100%; border-collapse: collapse; table-layout: fixed; }
@@ -154,17 +400,24 @@ form button[type="submit"] { width: 100%; margin-top: 8px;}
 
 small.validation-message { font-size: 0.8em; margin-top: 4px; display: block; }
 
-/* Responsive Media Queries */
+/* Responsive Media Queries untuk layar lebih besar */
 @media (min-width: 600px) {
-    body { font-size: 15.5px; } .container { padding: 0 15px; margin: 15px auto; }
+    body { font-size: 15.5px; }
+    .container { padding: 0 15px; margin: 15px auto; }
     header { padding: 20px 25px; text-align: left; gap: 20px; }
     .header-title-group { text-align: left; }
     header h1 { font-size: 2em; }
     .navigation-tabs { margin-top: 0; margin-bottom: 0;}
     .header-actions { width: auto; flex-direction: row; align-items: center;}
     header button#openInputModalBtn { width: auto; font-size: 0.95em; margin-top:0; }
+
+    /* Dashboard Grid berubah menjadi 2 kolom di layar yang lebih besar */
     .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-    .dashboard-section { padding: 20px; } .dashboard-section h2 { font-size: 1.4em; }
+
+    .dashboard-section { padding: 20px; }
+    .dashboard-section h2 { font-size: 1.4em; }
+
+    /* Elemen header section kembali ke horizontal */
     .dashboard-section-header { flex-direction: row; align-items: center; }
     .filter-controls { width: auto; flex-direction: row; gap: 10px;}
     .filter-controls > div {flex-direction: row; align-items: center;}
@@ -176,20 +429,27 @@ small.validation-message { font-size: 0.8em; margin-top: 4px; display: block; }
     .modal-content { padding: 25px; width: 85%; }
     #pieChartContainer { max-width: 320px; height: 290px; }
     input[type="text"], input[type="date"], input[type="time"], textarea, select, input[type="file"], .btn { font-size: 0.95em; padding: 10px 14px; }
-    .calendar-controls { flex-direction: row; gap: 15px;} .calendar-controls .btn-sm { width: auto; }
+    .calendar-controls { flex-direction: row; gap: 15px;}
+    .calendar-controls .btn-sm { width: auto; }
     .calendar-view th, .calendar-view td { padding: 6px; height: 90px; font-size: 0.9em;}
-    .calendar-view .date-number { font-size: 1em; } .calendar-view .today .date-number { width: 26px; height: 26px; }
-    .calendar-tasks-wrapper { max-height: 50px; } .calendar-task { font-size: 0.8em; }
+    .calendar-view .date-number { font-size: 1em; }
+    .calendar-view .today .date-number { width: 26px; height: 26px; }
+    .calendar-tasks-wrapper { max-height: 50px; }
+    .calendar-task { font-size: 0.8em; }
     .export-controls { flex-direction: row; align-items: center; gap: 12px; }
     .export-controls > div { flex-direction: row; align-items: center; width: auto; }
     .export-controls label { margin-bottom: 0; margin-right: 6px; }
     .export-controls select, .export-controls button { width: auto; font-size: 0.9em; }
 }
+
 @media (min-width: 992px) {
-    body { font-size: 16px; } .container { width: 90%; max-width: 1280px; margin: 20px auto; padding: 0 20px;}
-    header { padding: 25px 30px; } header h1 { font-size: 2.25em; }
+    body { font-size: 16px; }
+    .container { width: 90%; max-width: 1280px; margin: 20px auto; padding: 0 20px;}
+    header { padding: 25px 30px; }
+    header h1 { font-size: 2.25em; }
     header button#openInputModalBtn { font-size: 1em; }
-    .dashboard-grid { gap: 25px; } .dashboard-section { padding: 25px; }
+    .dashboard-grid { gap: 25px; }
+    .dashboard-section { padding: 25px; }
     .dashboard-section h2 { font-size: 1.6em; }
     .task-item .task-actions .btn { font-size: 0.85em; padding: 8px 15px; }
     #pieChartContainer { max-width: 350px; height: 300px; }
@@ -198,13 +458,14 @@ small.validation-message { font-size: 0.8em; margin-top: 4px; display: block; }
     input[type="text"], input[type="date"], input[type="time"], textarea, select, input[type="file"], .btn { font-size: 1em; padding: 12px 15px;}
     .calendar-controls h3 { font-size: 1.4em;}
     .calendar-view th, .calendar-view td { padding: 8px; height: 110px; font-size: 1em;}
-    .calendar-view .date-number { font-size: 1.1em; } .calendar-view .today .date-number { width: 28px; height: 28px; }
+    .calendar-view .date-number { font-size: 1.1em; }
+    .calendar-view .today .date-number { width: 28px; height: 28px; }
     .calendar-tasks-wrapper { max-height: 70px; }
     .export-controls { gap: 15px; }
     .export-controls select, .export-controls button { font-size: 0.95em; }
 }
-/* style.css (Tambahkan ini) */
 
+/* AUTHENTICATION STYLES */
 .auth-container {
     background-color: var(--card-bg-color);
     padding: 30px;
@@ -214,7 +475,6 @@ small.validation-message { font-size: 0.8em; margin-top: 4px; display: block; }
     max-width: 400px; /* Lebar maksimum untuk modal auth */
     text-align: center;
 }
-
 .auth-container h2 {
     color: var(--primary-color);
     margin-top: 0;
@@ -222,41 +482,12 @@ small.validation-message { font-size: 0.8em; margin-top: 4px; display: block; }
     font-size: 1.8em;
     font-weight: 700;
 }
-
-.form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
-    color: var(--secondary-color);
-    font-size: 0.95em;
-}
-
-.form-group input[type="text"],
-.form-group input[type="password"] {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 1em;
-    font-family: var(--font-family-sans-serif);
-    background-color: #fff;
-    color: var(--dark-color);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.form-group input[type="text"]:focus,
-.form-group input[type="password"]:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.15rem rgba(0,123,255,.25);
-    outline: none;
-}
-
-.btn-primary {
+/* Reusing .form-group label and input from general form styles */
+.auth-container .btn-primary {
     background-color: var(--primary-color);
     color: white;
     margin-bottom: 10px; /* Untuk tombol utama di modal auth */
 }
-
 /* Override default for button.btn-secondary in modal auth */
 .auth-container .btn-secondary {
     background-color: var(--secondary-color);
@@ -265,26 +496,15 @@ small.validation-message { font-size: 0.8em; margin-top: 4px; display: block; }
 .auth-container .btn-secondary:hover {
     background-color: #5a6268;
 }
-
-#authMessage.validation-message { /* Sesuaikan dengan kelas validasi yang ada */
+#authMessage.validation-message {
     padding: 10px;
     border-radius: 8px;
     font-size: 0.9em;
     display: none;
     text-align: center;
 }
-
-#authMessage.success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-}
-
-#authMessage.error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
+#authMessage.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+#authMessage.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
 /* Media queries for smaller screens for auth modal */
 @media (max-width: 480px) {
@@ -294,201 +514,9 @@ small.validation-message { font-size: 0.8em; margin-top: 4px; display: block; }
     .auth-container h2 {
         font-size: 1.5em;
     }
-    .form-group input[type="text"],
-    .form-group input[type="password"] {
-        padding: 10px;
-        font-size: 0.9em;
-    }
+    /* form-group input is already handled by general .form-group input in 480px media query */
     .auth-container .btn {
         padding: 10px 15px;
         font-size: 0.9em;
-    }
-}
-/* style.css (Tambahkan ini) */
-
-.auth-container {
-    background-color: var(--card-bg-color);
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px var(--shadow-color);
-    width: 100%;
-    max-width: 400px; /* Lebar maksimum untuk modal auth */
-    text-align: center;
-}
-
-.auth-container h2 {
-    color: var(--primary-color);
-    margin-top: 0;
-    margin-bottom: 25px;
-    font-size: 1.8em;
-    font-weight: 700;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
-    color: var(--secondary-color);
-    font-size: 0.95em;
-}
-
-.form-group input[type="text"],
-.form-group input[type="password"] {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 1em;
-    font-family: var(--font-family-sans-serif);
-    background-color: #fff;
-    color: var(--dark-color);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.form-group input[type="text"]:focus,
-.form-group input[type="password"]:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.15rem rgba(0,123,255,.25);
-    outline: none;
-}
-
-.btn-primary {
-    background-color: var(--primary-color);
-    color: white;
-    margin-bottom: 10px; /* Untuk tombol utama di modal auth */
-}
-
-/* Override default for button.btn-secondary in modal auth */
-.auth-container .btn-secondary {
-    background-color: var(--secondary-color);
-    color: white;
-}
-.auth-container .btn-secondary:hover {
-    background-color: #5a6268;
-}
-
-#authMessage.validation-message { /* Sesuaikan dengan kelas validasi yang ada */
-    padding: 10px;
-    border-radius: 8px;
-    font-size: 0.9em;
-    display: none;
-    text-align: center;
-}
-
-#authMessage.success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-}
-
-#authMessage.error {
-    background-color: #f8d7da;
-    color: #721c24; 
-    border: 1px solid #f5c6cb;
-}
-
-/* Media queries for smaller screens for auth modal */
-@media (max-width: 480px) {
-    .auth-container {
-        padding: 20px;
-    }
-    .auth-container h2 {
-        font-size: 1.5em;
-    }
-    .form-group input {
-        padding: 10px;
-        font-size: 0.9em;
-    }
-    .btn {
-        padding: 10px 15px;
-        font-size: 0.9em;
-    }
-}
-/* Tambahan untuk quote-section */
-.quote-section {
-    margin-top: 15px;
-    margin-bottom: 25px;
-    padding: 15px;
-    background-color: var(--card-bg-color);
-    border-radius: 12px;
-    box-shadow: 0 6px 20px var(--shadow-color);
-    text-align: center;
-    position: relative; /* Penting untuk animasi fade */
-    overflow: hidden;   /* Pastikan konten tidak keluar saat animasi */
-}
-
-.quote-section h2 {
-    margin-top: 0;
-    margin-bottom: 10px;
-    color: var(--primary-color);
-    font-size: 1.3em;
-    font-weight: 600;
-}
-
-.quote-section p {
-    font-size: 1.1em;
-    font-style: italic;
-    color: var(--dark-color);
-    line-height: 1.5;
-    opacity: 1; /* Default opacity */
-    transition: opacity 1s ease-in-out; /* Animasi fade */
-}
-
-/* Kelas untuk fade out */
-.quote-section p.fade-out {
-    opacity: 0;
-}
-
-/* Keyframes untuk fade-in (jika diperlukan secara terpisah) */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@media (min-width: 600px) {
-    .quote-section {
-        padding: 20px;
-    }
-    .quote-section h2 {
-        font-size: 1.4em;
-    }
-    .quote-section p {
-        font-size: 1.2em;
-    }
-}
-
-@media (min-width: 992px) {
-    .quote-section {
-        padding: 25px;
-    }
-    .quote-section h2 {
-        font-size: 1.6em;
-    }
-    .quote-section p {
-        font-size: 1.3em;
-    }
-}
-
-@media (min-width: 600px) {
-    .quote-section {
-        padding: 20px;
-    }
-    .quote-section h2 {
-        font-size: 1.4em;
-    }
-    .quote-section p {
-        font-size: 1.2em;
-    }
-}
-
-@media (min-width: 992px) {
-    .quote-section {
-        padding: 25px;
-    }
-    .quote-section h2 {
-        font-size: 1.6em;
-    }
-    .quote-section p {
-        font-size: 1.3em;
     }
 }
