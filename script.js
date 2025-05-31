@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function fetchQuotes() {
         try {
-            const response = await fetch('/data/quotes.json'); // Sesuaikan path jika perlu
+            const response = await fetch('../data/quotes.json'); // Sesuaikan path jika perlu
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
