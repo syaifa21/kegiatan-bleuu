@@ -77,6 +77,51 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentKerjaanSortCriteria = 'createdAt_desc';
     let currentKerjaanMonthFilter = 'all';
 
+    // Quote Harian
+    const dailyQuoteEl = document.getElementById('dailyQuote');
+    let quotesData = []; // Akan diisi dari JSON
+    let currentQuoteIndex = 0;
+    const QUOTE_CHANGE_INTERVAL_MS = 10000; // Durasi perubahan quote (10 detik)
+
+    async function fetchQuotes() {
+        try {
+            const response = await fetch('/data/quotes.json'); // Sesuaikan path jika perlu
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            quotesData = await response.json();
+            if (quotesData.length > 0) {
+                displayNextQuote(); // Tampilkan quote pertama kali
+                setInterval(displayNextQuote, QUOTE_CHANGE_INTERVAL_MS); // Atur interval perubahan
+            } else {
+                dailyQuoteEl.textContent = "Tidak ada quote yang tersedia.";
+            }
+        } catch (error) {
+            console.error("Gagal memuat quotes:", error);
+            dailyQuoteEl.textContent = "Gagal memuat quote.";
+        }
+    }
+
+    function displayNextQuote() {
+        if (quotesData.length === 0) return;
+
+        // Fade out current quote
+        if (dailyQuoteEl.textContent !== '') { // Hanya fade out jika ada teks sebelumnya
+            dailyQuoteEl.classList.add('fade-out');
+        }
+
+        setTimeout(() => {
+            currentQuoteIndex = (currentQuoteIndex + 1) % quotesData.length;
+            const quoteObj = quotesData[currentQuoteIndex];
+            dailyQuoteEl.textContent = `"${quoteObj.quote}" - ${quoteObj.author}`;
+            dailyQuoteEl.classList.remove('fade-out'); // Fade in new quote
+        }, 1000); // Durasi fade-out (sesuai transition di CSS)
+    }
+
+    // Panggil saat DOM dimuat
+    fetchQuotes();
+
+
     // --- FUNGSI AUTENTIKASI ---
     function showAuthMessage(type, text) {
         authMessage.className = 'validation-message'; // Reset classes
@@ -621,7 +666,7 @@ document.addEventListener('DOMContentLoaded', async () => {
          let taskRows = tasks && tasks.length > 0 ? tasks.map(task => { //
             return `<tr><td>${task.id}</td><td>${escapeHtml(task.nama)}</td><td style="max-width:300px;word-wrap:break-word;">${escapeHtml(task.detail)}</td><td>${getStatusText(task.status)}</td><td>${escapeHtml(task.tenggatDisplay) || '-'}</td><td>${escapeHtml(task.lampiranNamaOriginal) || '-'}</td><td>${new Date(task.createdAt).toLocaleDateString('id-ID')}</td></tr>` //
          }).join('') : '<tr><td colspan="7" style="text-align:center;">Tidak ada data.</td></tr>'; //
-         return `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Laporan Kerjaan - ${periodTitle}</title><style>body{font-family:Arial,sans-serif;margin:20px}h1{text-align:center;color:#333}table{width:100%;border-collapse:collapse;margin-top:20px;font-size:.9em}th,td{border:1px solid #ddd;padding:10px;text-align:left}th{background-color:#f2f2f2;color:#333}tr:nth-child(even){background-color:#f9f9f9}</style></head><body><h1>Laporan Kerjaan - ${periodTitle}</h1><table><thead><tr><th>ID</th><th>Nama Kerjaan</th><th>Detail</th><th>Status</th><th>Tenggat/Mulai</th><th>Lampiran</th><th>Dibuat</th></tr></thead><tbody>${taskRows}</tbody></table><p style="text-align:center;margin-top:20px;font-size:.8em">Laporan dibuat pada: ${new Date().toLocaleString('id-ID')}</p></body></html>`; //
+         return `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Laporan Kerjaan - ${periodTitle}</title><style>body{font-family:Arial,sans-serif;margin:20px}h1{text-align:center;color:#333}table{width:100%;border-collapse:collapse;margin-top:20px;font-size:.9em}th,td{border:1px solid #ddd;padding:10px;text-align:left}th{background-color:#e9ecef;color:#333}tr:nth-child(even){background-color:#f9f9f9}</style></head><body><h1>Laporan Kerjaan - ${periodTitle}</h1><table><thead><tr><th>ID</th><th>Nama Kerjaan</th><th>Detail</th><th>Status</th><th>Tenggat/Mulai</th><th>Lampiran</th><th>Dibuat</th></tr></thead><tbody>${taskRows}</tbody></table><p style="text-align:center;margin-top:20px;font-size:.8em">Laporan dibuat pada: ${new Date().toLocaleString('id-ID')}</p></body></html>`; //
     }
     function triggerDownload(filename, content, mimeType) { //
         const blob = new Blob([content], { type: mimeType }); const link = document.createElement("a"); //

@@ -383,7 +383,7 @@ small.validation-message { font-size: 0.8em; margin-top: 4px; display: block; }
 
 #authMessage.error {
     background-color: #f8d7da;
-    color: #721c24;
+    color: #721c24; 
     border: 1px solid #f5c6cb;
 }
 
@@ -402,5 +402,93 @@ small.validation-message { font-size: 0.8em; margin-top: 4px; display: block; }
     .btn {
         padding: 10px 15px;
         font-size: 0.9em;
+    }
+}
+/* Tambahan untuk quote-section */
+.quote-section {
+    margin-top: 15px;
+    margin-bottom: 25px;
+    padding: 15px;
+    background-color: var(--card-bg-color);
+    border-radius: 12px;
+    box-shadow: 0 6px 20px var(--shadow-color);
+    text-align: center;
+    position: relative; /* Penting untuk animasi fade */
+    overflow: hidden;   /* Pastikan konten tidak keluar saat animasi */
+}
+
+.quote-section h2 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: var(--primary-color);
+    font-size: 1.3em;
+    font-weight: 600;
+}
+
+.quote-section p {
+    font-size: 1.1em;
+    font-style: italic;
+    color: var(--dark-color);
+    line-height: 1.5;
+    opacity: 1; /* Default opacity */
+    transition: opacity 1s ease-in-out; /* Animasi fade */
+}
+
+/* Kelas untuk fade out */
+.quote-section p.fade-out {
+    opacity: 0;
+}
+
+/* Keyframes untuk fade-in (jika diperlukan secara terpisah) */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@media (min-width: 600px) {
+    .quote-section {
+        padding: 20px;
+    }
+    .quote-section h2 {
+        font-size: 1.4em;
+    }
+    .quote-section p {
+        font-size: 1.2em;
+    }
+}
+
+@media (min-width: 992px) {
+    .quote-section {
+        padding: 25px;
+    }
+    .quote-section h2 {
+        font-size: 1.6em;
+    }
+    .quote-section p {
+        font-size: 1.3em;
+    }
+}
+
+@media (min-width: 600px) {
+    .quote-section {
+        padding: 20px;
+    }
+    .quote-section h2 {
+        font-size: 1.4em;
+    }
+    .quote-section p {
+        font-size: 1.2em;
+    }
+}
+
+@media (min-width: 992px) {
+    .quote-section {
+        padding: 25px;
+    }
+    .quote-section h2 {
+        font-size: 1.6em;
+    }
+    .quote-section p {
+        font-size: 1.3em;
     }
 }
