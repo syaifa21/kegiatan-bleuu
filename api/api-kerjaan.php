@@ -154,8 +154,8 @@ try {
                 if (!$stmt->execute()) { throw new Exception('Gagal INSERT tugas: ' . $stmt->error); }
                 $taskData['id'] = $conn->insert_id; // Dapatkan ID yang baru saja diinsert
                 $stmt->close();
-                $notificationMessage = "✨ *TUGAS BARU DITAMBAHKAN*\nUntuk *" . htmlspecialchars($usernameLoggedIn) . "*:\n";
-                $notificationMessage .= "Tugas baru: *" . htmlspecialchars($taskData['nama']) . "*";
+                $notificationMessage = "✨ *TUGAS BARU DITAMBAHKAN*\nUntuk |" . htmlspecialchars($usernameLoggedIn) . "| :\n";
+                $notificationMessage .= "Tugas baru: " . htmlspecialchars($taskData['nama']) . "-";
             }
             
             $response = ['status' => 'success', 'message' => 'Tugas berhasil disimpan.', 'task' => $taskData];
@@ -163,7 +163,15 @@ try {
             $statusTextNotif = getStatusTextForTelegram($taskData['status']);
             $notificationMessage .= "\nStatus: " . $statusTextNotif;
             if (!empty($taskData['tenggatDisplay'])) { $notificationMessage .= "\nTenggat: " . htmlspecialchars($taskData['tenggatDisplay']) . " ⏰"; }
-            
+            // Menambahkan detail pekerjaan
+            if (!empty($taskData['detail'])) {
+                $notificationMessage .= "\nDetail: " . htmlspecialchars($taskData['detail']) . "-";
+            }
+            // Menambahkan informasi lampiran jika ada
+            if (!empty($taskData['lampiranNamaOriginal'])) {
+                $notificationMessage .= "\nLampiran: 📎 " . htmlspecialchars($taskData['lampiranNamaOriginal']);
+            }
+
             // Tambahkan bingkai ke notifikasi
             $framedNotification = createFancyBorder($notificationMessage);
 
@@ -242,3 +250,4 @@ try {
 
 echo json_encode($response);
 exit;
+?>
