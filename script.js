@@ -81,11 +81,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const dailyQuoteEl = document.getElementById('dailyQuote');
     let quotesData = []; // Akan diisi dari JSON
     let currentQuoteIndex = 0;
-    const QUOTE_CHANGE_INTERVAL_MS = 10000; // Durasi perubahan quote (10 detik)
+    const QUOTE_CHANGE_INTERVAL_MS = 5000; // Durasi perubahan quote (10 detik)
 
     async function fetchQuotes() {
         try {
-            const response = await fetch('../data/quotes.json'); // Sesuaikan path jika perlu
+            const response = await fetch('/data/quotes.json'); // Sesuaikan path jika perlu
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
