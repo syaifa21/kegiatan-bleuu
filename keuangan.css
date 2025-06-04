@@ -334,6 +334,7 @@ button#delete-month-data-button:hover { background-color: #eab308; color: var(--
 
 /* Chart Styles */
 .chart-card {
+    color: var(--text-light-color);
     grid-column: 1 / -1; /* Lebarkan chart agar mengambil seluruh lebar grid */
     min-height: 350px; /* Tinggi minimum untuk canvas chart */
     display: flex;
@@ -342,11 +343,13 @@ button#delete-month-data-button:hover { background-color: #eab308; color: var(--
     align-items: center;
 }
 .chart-card canvas {
+    color: var(--text-light-color);
     max-width: 100%;
     height: auto;
     flex-grow: 1; /* Allow canvas to take available space */
 }
 .chart-card .card-content {
+    color: var(--text-light-color);
     width: 100%; /* Ensure canvas container takes full width */
     padding-top: 0; /* Remove top padding as header is separate */
 }
