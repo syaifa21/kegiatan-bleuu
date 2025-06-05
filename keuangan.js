@@ -7,9 +7,9 @@ const modalSaveButton = document.getElementById('modal-save-button');
 
 const API_ENDPOINT = 'api/api-keuangan.php';
 
-let allFinancialData = {}; // Hanya akan berisi data bulanan (YYYY-MM)
-let currentMonthKey; // FormatYYYY-MM
-let monthlyChart = null; // Initialize to null for Chart.js destruction logic
+let allFinancialData = {};
+let currentMonthKey;
+let monthlyChart = null;
 
 const MONTHS = [
     "Januari", "Februari", "Maret", "April", "Mei", "Juni",
@@ -27,20 +27,20 @@ function formatRupiahDisplay(angka, withRpPrefix = true) {
         rupiah += separator + ribuan.join('.');
     }
     return (withRpPrefix ? 'Rp ' : '') + (rupiah || '0');
- }
+}
+
 function parseRupiah(rupiahString) {
     if (typeof rupiahString === 'number') return rupiahString;
     if (!rupiahString) return 0;
-    // Allow parsing of negative numbers by keeping the minus sign
-    return parseFloat(String(rupiahString).replace(/[^0-9-]/g, '')) || 0;
+    const cleanedString = String(rupiahString).replace(/[^0-9-]/g, '');
+    return parseFloat(cleanedString) || 0;
 }
-
-// --- Data Handling (Load/Save) ---
 
 function getCurrentMonthData() {
     if (!allFinancialData[currentMonthKey]) {
         return {
-            alokasiPersen: [20, 50, 20, 10], // Default percentages
+            gajiUtama: 0,
+            alokasiPersen: [20, 50, 20, 10],
             pendapatanItems: [],
             pengeluaranItems: []
         };
@@ -53,7 +53,7 @@ async function saveDataToServer(monthKey, monthData) {
     try {
         const response = await fetch(API_ENDPOINT, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 monthKey: monthKey,
                 monthData: monthData
@@ -98,6 +98,8 @@ async function loadAllDataFromServer() {
 
             console.log('CLIENT: Semua data JSON berhasil diparse dari server:', data);
             if (data && typeof data === 'object') {
+                const globalData = data.global || { pendapatanTetap: [], pengeluaranTetap: [] };
+                delete data.global;
                 allFinancialData = data;
             } else {
                 console.log("CLIENT: Data dari server kosong, memuat struktur default.");
@@ -112,18 +114,19 @@ async function loadAllDataFromServer() {
         allFinancialData = {};
     }
     populateMonthYearSelector();
-    loadDataForSelectedMonth(); // Will also call hitungSemua and updateChart
+    loadDataForSelectedMonth();
+    updateChart(); // Panggil updateChart setelah data dimuat
 }
 
 function populateUIWithData(monthData) {
     console.log("CLIENT: Memulai populateUIWithData dengan data bulanan:", monthData);
 
-    // Gaji utama sekarang adalah derived value, akan diisi oleh hitungSemua()
-    document.getElementById('total-pendapatan-alokasi-display').textContent = formatRupiahDisplay(0); // Reset for current month
+    document.getElementById('total-pendapatan-alokasi-display').textContent = formatRupiahDisplay(monthData.gajiUtama || 0);
 
     const inputPersenAlokasi = document.querySelectorAll('#tabel-alokasi tbody .persen-alokasi');
     inputPersenAlokasi.forEach((input, index) => {
-        input.value = (monthData.alokasiPersen && monthData.alokasiPersen[index] !== undefined) ? monthData.alokasiPersen[index] : (['20', '50', '20', '10'][index] || '0');
+        const percentageValue = (monthData.alokasiPersen && monthData.alokasiPersen[index] !== undefined) ? parseFloat(monthData.alokasiPersen[index]) : undefined;
+        input.value = isNaN(percentageValue) ? (['20', '50', '20', '10'][index] || '0') : percentageValue;
     });
 
     const tabelPendapatanBulananBody = document.querySelector('#tabel-pendapatan-bulanan tbody');
@@ -139,37 +142,22 @@ function populateUIWithData(monthData) {
     });
 
     formatInitialAmounts();
-    hitungSemua(false); // Hitung ulang tanpa menyimpan ke server karena ini adalah pemuatan
-    // updateChart() is called inside hitungSemua
+    hitungSemua(false);
     console.log("CLIENT: Selesai populateUIWithData.");
 }
-
-
-// --- Month Selector Logic ---
 
 function populateMonthYearSelector() {
     const selectEl = document.getElementById('month-year-select');
     selectEl.innerHTML = '';
 
     const today = new Date();
-    let startYear = 2020;
-    let endYear = today.getFullYear() + 1;
+    let allAvailableMonths = new Set();
 
-    const savedMonths = Object.keys(allFinancialData)
-                            .sort();
-
-    const allAvailableMonths = new Set();
-    savedMonths.forEach(monthKey => allAvailableMonths.add(monthKey));
+    Object.keys(allFinancialData).forEach(monthKey => allAvailableMonths.add(monthKey));
 
     for (let i = -12; i <= 12; i++) {
         const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
         allAvailableMonths.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
-    }
-
-    for (let year = startYear; year <= endYear; year++) {
-        for (let month = 1; month <= 12; month++) {
-            allAvailableMonths.add(`${year}-${String(month).padStart(2, '0')}`);
-        }
     }
 
     const sortedMonths = Array.from(allAvailableMonths).sort();
@@ -177,26 +165,34 @@ function populateMonthYearSelector() {
     let foundCurrentMonth = false;
     const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
 
-    sortedMonths.forEach(monthKey => {
+    if (sortedMonths.length === 0) {
         const option = document.createElement('option');
-        option.value = monthKey;
-        const [year, month] = monthKey.split('-');
-        option.textContent = `${MONTHS[parseInt(month) - 1]} ${year}`;
+        option.value = currentMonth;
+        option.textContent = `${MONTHS[today.getMonth()]} ${today.getFullYear()}`;
         selectEl.appendChild(option);
-        if (monthKey === currentMonth) {
-            option.selected = true;
-            foundCurrentMonth = true;
-        }
-    });
+        currentMonthKey = currentMonth;
+    } else {
+        sortedMonths.forEach(monthKey => {
+            const option = document.createElement('option');
+            option.value = monthKey;
+            const [year, month] = monthKey.split('-');
+            option.textContent = `${MONTHS[parseInt(month) - 1]} ${year}`;
+            selectEl.appendChild(option);
+            if (monthKey === currentMonth) {
+                option.selected = true;
+                foundCurrentMonth = true;
+            }
+        });
 
-    if (!foundCurrentMonth && sortedMonths.length > 0) {
-         if (selectEl.querySelector(`option[value="${currentMonth}"]`)) {
-            selectEl.value = currentMonth;
-         } else {
-            selectEl.value = sortedMonths[sortedMonths.length - 1];
-         }
+        if (!foundCurrentMonth) {
+            if (selectEl.querySelector(`option[value="${currentMonth}"]`)) {
+                selectEl.value = currentMonth;
+            } else if (sortedMonths.length > 0) {
+                selectEl.value = sortedMonths[sortedMonths.length - 1];
+            }
+        }
+        currentMonthKey = selectEl.value;
     }
-    currentMonthKey = selectEl.value;
 
     document.getElementById('prev-month-button').onclick = () => navigateMonth(-1);
     document.getElementById('next-month-button').onclick = () => navigateMonth(1);
@@ -220,18 +216,26 @@ function loadDataForSelectedMonth() {
     currentMonthKey = selectEl.value;
     console.log(`CLIENT: Memuat data untuk bulan: ${currentMonthKey}`);
 
-    const monthData = getCurrentMonthData();
+    if (!allFinancialData[currentMonthKey]) {
+        allFinancialData[currentMonthKey] = {
+            gajiUtama: 0,
+            alokasiPersen: [20, 50, 20, 10],
+            pendapatanItems: [],
+            pengeluaranItems: []
+        };
+    }
+    const monthData = allFinancialData[currentMonthKey];
     populateUIWithData(monthData);
 }
-
-// --- Core Calculation & UI Update ---
 
 function hitungAlokasi() {
     const totalPendapatanBulananAktual = parseRupiah(document.getElementById('total-pendapatan-bulanan').textContent);
 
-    // Set the 'Total Pendapatan untuk Alokasi' display span to this calculated value
-    const totalPendapatanAlokasiDisplay = document.getElementById('total-pendapatan-alokasi-display');
-    totalPendapatanAlokasiDisplay.textContent = formatRupiahDisplay(totalPendapatanBulananAktual);
+    document.getElementById('total-pendapatan-alokasi-display').textContent = formatRupiahDisplay(totalPendapatanBulananAktual);
+
+    if (allFinancialData[currentMonthKey]) {
+        allFinancialData[currentMonthKey].gajiUtama = totalPendapatanBulananAktual;
+    }
 
     let totalPersen = 0;
     let totalRupiahAlokasi = 0;
@@ -244,9 +248,8 @@ function hitungAlokasi() {
         const inputPersen = baris.querySelector('.persen-alokasi');
         const selJumlahAlokasi = baris.querySelector('.jumlah-alokasi');
         if (inputPersen && selJumlahAlokasi) {
-            const persen = parseFloat(inputPersen.value) || 0; // Use parseFloat for text input
+            const persen = parseFloat(inputPersen.value) || 0;
             totalPersen += persen;
-            // Calculate based on the derived total income for allocation
             const jumlahAlokasi = (persen / 100) * totalPendapatanBulananAktual;
             selJumlahAlokasi.textContent = formatRupiahDisplay(jumlahAlokasi);
             totalRupiahAlokasi += jumlahAlokasi;
@@ -316,8 +319,9 @@ function openModal(type) {
     }
     modalDeskripsi.focus();
 }
+
 function closeModal() {
-     modalOverlay.classList.remove('active');
+    modalOverlay.classList.remove('active');
 }
 
 modalSaveButton.onclick = function() {
@@ -338,10 +342,11 @@ modalSaveButton.onclick = function() {
 };
 
 modalOverlay.addEventListener('click', function(event) {
-     if (event.target === modalOverlay) {
+    if (event.target === modalOverlay) {
         closeModal();
     }
 });
+
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape' && modalOverlay.classList.contains('active')) {
         closeModal();
@@ -357,7 +362,7 @@ function hapusBaris(buttonElement, tableId) {
 }
 
 function editCell(cell, isNumeric = false, tableId = null) {
-     if (cell.querySelector('input')) return;
+    if (cell.querySelector('input')) return;
     const originalValue = cell.textContent;
     const currentValue = isNumeric ? parseRupiah(originalValue) : originalValue;
 
@@ -369,8 +374,8 @@ function editCell(cell, isNumeric = false, tableId = null) {
     input.style.border = '1px solid var(--primary-color)';
     input.style.borderRadius = 'var(--border-radius)';
     input.style.fontSize = 'inherit';
-    input.style.backgroundColor = 'var(--light-color)'; /* Disini disesuaikan */
-    input.style.color = 'var(--text-color)'; /* Disini disesuaikan */
+    input.style.backgroundColor = 'var(--light-color)';
+    input.style.color = 'var(--text-color)';
 
     cell.innerHTML = '';
     cell.appendChild(input);
@@ -379,18 +384,24 @@ function editCell(cell, isNumeric = false, tableId = null) {
 
     const saveAndRestore = () => {
         let newValue = input.value;
-        cell.textContent = isNumeric ? formatRupiahDisplay(parseRupiah(newValue), false) : newValue;
-        hitungSemua(); // Recalculate and save after any edit
+        if (tableId === 'tabel-alokasi' && cell.classList.contains('persen-alokasi')) {
+            cell.textContent = newValue;
+        } else {
+            cell.textContent = isNumeric ? formatRupiahDisplay(parseRupiah(newValue), false) : newValue;
+        }
+
+        hitungSemua();
         cell.onclick = () => editCell(cell, isNumeric, tableId);
     };
 
     input.onblur = saveAndRestore;
-    input.onkeypress = e => { if (e.key === 'Enter') input.blur(); };
+    input.onkeypress = e => {
+        if (e.key === 'Enter') input.blur();
+    };
     cell.onclick = null;
 }
 
 function hitungRingkasanBulanan() {
-    // totalPendapatanBulanan dan totalPengeluaranBulanan sudah dihitung di fungsi hitungTotal sebelumnya
     const totalPendapatanBulanan = hitungTotal('tabel-pendapatan-bulanan', 'amount-income-bulanan', 'total-pendapatan-bulanan');
     const totalPengeluaranBulanan = hitungTotal('tabel-pengeluaran-bulanan', 'amount-expense-bulanan', 'total-pengeluaran-bulanan');
 
@@ -409,12 +420,16 @@ function hitungRingkasanGlobal() {
 
     for (const monthKey in allFinancialData) {
         const monthData = allFinancialData[monthKey];
-        (monthData.pendapatanItems || []).forEach(item => {
-            totalPendapatanBulananAkumulasi += parseRupiah(item.jumlah);
-        });
-        (monthData.pengeluaranItems || []).forEach(item => {
-            totalPengeluaranBulananAkumulasi += parseRupiah(item.jumlah);
-        });
+        if (monthData) {
+            totalPendapatanBulananAkumulasi += parseRupiah(monthData.gajiUtama || 0);
+
+            (monthData.pendapatanItems || []).forEach(item => {
+                totalPendapatanBulananAkumulasi += parseRupiah(item.jumlah);
+            });
+            (monthData.pengeluaranItems || []).forEach(item => {
+                totalPengeluaranBulananAkumulasi += parseRupiah(item.jumlah);
+            });
+        }
     }
 
     const sisaDanaGlobal = totalPendapatanBulananAkumulasi - totalPengeluaranBulananAkumulasi;
@@ -441,17 +456,16 @@ function formatInitialAmounts() {
 function hitungSemua(shouldSave = true) {
     console.log(`CLIENT: hitungSemua dipanggil. Simpan ke server: ${shouldSave}`);
 
-    // Hitung total pendapatan bulanan aktual untuk alokasi
     const totalPendapatanBulananSaatIni = hitungTotal('tabel-pendapatan-bulanan', 'amount-income-bulanan', 'total-pendapatan-bulanan');
 
     document.getElementById('total-pendapatan-alokasi-display').textContent = formatRupiahDisplay(totalPendapatanBulananSaatIni);
 
-    hitungAlokasi(); // Will now use the new total for allocation
+    hitungAlokasi();
     hitungRingkasanBulanan();
     hitungRingkasanGlobal();
 
     if (shouldSave) {
-        const alokasiPersen = Array.from(document.querySelectorAll('#tabel-alokasi tbody .persen-alokasi')).map(input => input.value);
+        const alokasiPersen = Array.from(document.querySelectorAll('#tabel-alokasi tbody .persen-alokasi')).map(input => parseFloat(input.value) || 0);
 
         const pendapatanItems = Array.from(document.querySelectorAll('#tabel-pendapatan-bulanan tbody tr')).map(row => ({
             deskripsi: row.cells[0].textContent,
@@ -463,12 +477,12 @@ function hitungSemua(shouldSave = true) {
         }));
 
         const currentMonthData = {
+            gajiUtama: totalPendapatanBulananSaatIni,
             alokasiPersen: alokasiPersen,
             pendapatanItems: pendapatanItems,
             pengeluaranItems: pengeluaranItems
         };
 
-        // Update the global allFinancialData object
         allFinancialData[currentMonthKey] = currentMonthData;
 
         saveDataToServer(currentMonthKey, currentMonthData);
@@ -487,7 +501,7 @@ async function deleteCurrentMonthData() {
         try {
             const response = await fetch(API_ENDPOINT, {
                 method: 'DELETE',
-                headers: { 'Content-Type': 'application/json', },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ key: currentMonthKey }),
             });
             const responseText = await response.text();
@@ -514,8 +528,6 @@ async function deleteCurrentMonthData() {
     }
 }
 
-
-// --- Chart.js Integration ---
 function initChart() {
     const ctx = document.getElementById('monthlyFinancialChart').getContext('2d');
     if (monthlyChart) {
@@ -528,15 +540,15 @@ function initChart() {
             datasets: [
                 {
                     label: 'Total Pendapatan',
-                    backgroundColor: 'rgba(40, 167, 69, 0.7)', /* Keep green for income */
-                    borderColor: 'rgba(40, 167, 69, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.8)', // Warna lebih terang
+                    borderColor: 'rgba(75, 192, 192, 1)',
                     borderWidth: 1,
                     data: [],
                 },
                 {
                     label: 'Total Pengeluaran',
-                    backgroundColor: 'rgba(220, 53, 69, 0.7)', /* Keep red for expense */
-                    borderColor: 'rgba(220, 53, 69, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.8)', // Warna lebih terang
+                    borderColor: 'rgba(255, 99, 132, 1)',
                     borderWidth: 1,
                     data: [],
                 }
@@ -548,19 +560,19 @@ function initChart() {
             scales: {
                 x: {
                     beginAtZero: true,
-                    grid: { display: false, color: 'rgba(71, 85, 105, 0.2)' }, /* Grid lines for dark theme */
+                    grid: { display: false, color: 'rgba(150, 150, 150, 0.2)' }, // Warna grid lebih terang
                     ticks: {
-                        color: 'var(--text-light-color)' /* Axis labels color */
+                        color: 'rgba(220, 220, 220, 1)' // Warna teks sumbu X lebih terang
                     }
                 },
                 y: {
                     beginAtZero: true,
-                    grid: { color: 'rgba(71, 85, 105, 0.2)' }, /* Grid lines for dark theme */
+                    grid: { color: 'rgba(150, 150, 150, 0.2)' }, // Warna grid lebih terang
                     ticks: {
                         callback: function(value, index, values) {
                             return formatRupiahDisplay(value);
                         },
-                        color: 'var(--text-light-color)' /* Axis labels color */
+                        color: 'rgba(220, 220, 220, 1)' // Warna teks sumbu Y lebih terang
                     }
                 }
             },
@@ -578,20 +590,20 @@ function initChart() {
                             return label;
                         }
                     },
-                    backgroundColor: 'rgba(0,0,0,0.8)', /* Dark tooltip background */
-                    titleColor: 'var(--text-color)', /* Light title color */
-                    bodyColor: 'var(--text-color)' /* Light body color */
+                    backgroundColor: 'rgba(50, 50, 50, 0.9)', // Warna tooltip lebih terang
+                    titleColor: 'rgba(255, 255, 255, 1)', // Warna teks judul tooltip lebih terang
+                    bodyColor: 'rgba(255, 255, 255, 1)' // Warna teks body tooltip lebih terang
                 },
                 legend: {
                     position: 'top',
                     labels: {
-                        color: 'var(--text-color)' /* Legend labels color */
+                        color: 'rgba(255, 255, 255, 1)' // Warna teks legenda lebih terang
                     }
                 },
                 title: {
                     display: true,
                     text: 'Perbandingan Pendapatan vs Pengeluaran Bulanan',
-                    color: 'var(--text-color)' /* Chart title color */
+                    color: 'rgba(255, 255, 255, 1)' // Warna teks judul chart lebih terang
                 }
             }
         }
@@ -608,19 +620,19 @@ function updateChart() {
     const chartExpenseData = [];
 
     const monthKeys = Object.keys(allFinancialData)
-                          .sort((a, b) => {
-                              const dateA = new Date(a);
-                              const dateB = new Date(b);
-                              return dateA - dateB;
-                          });
+        .sort((a, b) => {
+            const dateA = new Date(a);
+            const dateB = new Date(b);
+            return dateA - dateB;
+        });
 
     monthKeys.forEach(monthKey => {
         const monthData = allFinancialData[monthKey];
         if (monthData) {
             const [year, monthNum] = monthKey.split('-');
-            chartLabels.push(`${MONTHS[parseInt(monthNum) - 1].substring(0,3)} ${year.substring(2)}`);
+            chartLabels.push(`${MONTHS[parseInt(monthNum) - 1].substring(0, 3)} ${year.substring(2)}`);
 
-            let totalIncome = 0;
+            let totalIncome = parseRupiah(monthData.gajiUtama || 0);
             (monthData.pendapatanItems || []).forEach(item => totalIncome += parseRupiah(item.jumlah));
 
             let totalExpense = 0;
@@ -638,19 +650,17 @@ function updateChart() {
     console.log("CLIENT: Chart updated.");
 }
 
-
-// Fungsi Ekspor (Perlu diperbarui untuk mencakup data global dan bulanan)
 function collectDataForExport() {
     const data = {
         periodeLaporan: `Laporan Keuangan Pribadi per ${new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric'})}`,
-        selectedMonthData: {}, // Data untuk bulan yang sedang aktif
-        allMonthlyData: {} // Semua data bulanan
+        selectedMonthData: {},
+        allMonthlyData: {}
     };
 
-    // Current month data
     const totalPendapatanUntukAlokasi = parseRupiah(document.getElementById('total-pendapatan-alokasi-display').textContent) || 0;
 
     data.selectedMonthData = {
+        gajiUtama: totalPendapatanUntukAlokasi,
         alokasiPersen: Array.from(document.querySelectorAll('#tabel-alokasi tbody .persen-alokasi')).map(input => parseFloat(input.value) || 0),
         alokasiJumlah: Array.from(document.querySelectorAll('#tabel-alokasi tbody .jumlah-alokasi')).map(td => parseRupiah(td.textContent)),
         pendapatanItems: Array.from(document.querySelectorAll('#tabel-pendapatan-bulanan tbody tr')).map(row => ({
@@ -662,35 +672,33 @@ function collectDataForExport() {
             jumlah: parseRupiah(row.cells[1].textContent)
         }))
     };
-    // Tambahkan total pendapatan untuk alokasi ke selectedMonthData untuk kebutuhan ekspor
     data.selectedMonthData.totalPendapatanUntukAlokasi = totalPendapatanUntukAlokasi;
 
-
-    // All monthly data for global summary in export
     data.allMonthlyData = {};
     for (const monthKey in allFinancialData) {
         data.allMonthlyData[monthKey] = allFinancialData[monthKey];
     }
 
-    // Calculate summaries for current month for export (using values from UI for current month)
     data.summaryBulanan = {
         totalPendapatan: parseRupiah(document.getElementById('summary-total-pendapatan-bulanan').textContent),
         totalPengeluaran: parseRupiah(document.getElementById('summary-total-pengeluaran-bulanan').textContent),
         sisaDana: parseRupiah(document.getElementById('summary-sisa-dana-bulanan').textContent)
     };
 
-    // Calculate summaries for global data for export (re-calculate to ensure consistency)
     let exportGlobalTotalPendapatan = 0;
     let exportGlobalTotalPengeluaran = 0;
 
     for (const monthKey in data.allMonthlyData) {
         const monthData = data.allMonthlyData[monthKey];
-        (monthData.pendapatanItems || []).forEach(item => {
-            exportGlobalTotalPendapatan += parseRupiah(item.jumlah);
-        });
-        (monthData.pengeluaranItems || []).forEach(item => {
-            exportGlobalTotalPengeluaran += parseRupiah(item.jumlah);
-        });
+        if (monthData) {
+            exportGlobalTotalPendapatan += parseRupiah(monthData.gajiUtama || 0);
+            (monthData.pendapatanItems || []).forEach(item => {
+                exportGlobalTotalPendapatan += parseRupiah(item.jumlah);
+            });
+            (monthData.pengeluaranItems || []).forEach(item => {
+                exportGlobalTotalPengeluaran += parseRupiah(item.jumlah);
+            });
+        }
     }
     const exportSisaDanaGlobal = exportGlobalTotalPendapatan - exportGlobalTotalPengeluaran;
 
@@ -716,7 +724,7 @@ function triggerDownload(content, filename, contentType) {
 
 function exportData(format) {
     const data = collectDataForExport();
-    const tgl = new Date().toISOString().slice(0,10).replace(/-/g,'');
+    const tgl = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     let content = '';
     let filename = `LaporanKeuangan_Pro_${tgl}`;
     let contentType = '';
@@ -812,21 +820,33 @@ function exportData(format) {
         const createTableHTML = (title, headers, rows, totalRow = null) => {
             let html = `<h3>${title}</h3><table><thead><tr>`;
             headers.forEach(header => html += `<th>${header}</th>`);
-            if (headers.length === 1 && rows.length > 0 && typeof rows[0][1] !== 'undefined') {
+            if (headers.length === 1 && rows.length > 0 && typeof rows[0][1] !== 'undefined' && title !== "Alokasi Dana Bulanan") {
                 html += `<th>Jumlah</th>`;
             }
             html += "</tr></thead><tbody>";
             rows.forEach(row => {
                 html += `<tr>`;
                 row.forEach((cell, idx) => {
-                     html += `<td>${(idx === 1 || headers.length === 3 && idx === 2) && typeof cell === 'number' ? formatRpExport(cell) : cell}</td>`;
+                    let formattedCell = cell;
+                    if (title === "Alokasi Dana Bulanan" && idx === 2 && typeof cell === 'number') {
+                        formattedCell = formatRpExport(cell);
+                    } else if (title !== "Alokasi Dana Bulanan" && idx === 1 && typeof cell === 'number') {
+                        formattedCell = formatRpExport(cell);
+                    }
+                    html += `<td>${formattedCell}</td>`;
                 });
                 html += `</tr>`;
             });
             if (totalRow) {
                 html += `<tr class="total">`;
                 totalRow.forEach((cell, idx) => {
-                     html += `<td>${(idx === 1 || headers.length === 3 && idx === 2) && typeof cell === 'number' ? formatRpExport(cell) : cell}</td>`;
+                    let formattedCell = cell;
+                    if (title === "Alokasi Dana Bulanan" && idx === 2 && typeof cell === 'number') {
+                        formattedCell = formatRpExport(cell);
+                    } else if (title !== "Alokasi Dana Bulanan" && idx === 1 && typeof cell === 'number') {
+                        formattedCell = formatRpExport(cell);
+                    }
+                    html += `<td>${formattedCell}</td>`;
                 });
                 html += `</tr>`;
             }
@@ -880,11 +900,13 @@ function exportData(format) {
     triggerDownload(content, filename, contentType);
 }
 
-
 document.getElementById('tahun-sekarang').textContent = new Date().getFullYear();
 window.onload = async () => {
     console.log("CLIENT: window.onload dijalankan.");
-    initChart();
-    await loadAllDataFromServer();
+    initChart(); // Inisialisasi chart saat window dimuat
+    document.querySelectorAll('#tabel-alokasi tbody .persen-alokasi').forEach(input => {
+        input.addEventListener('change', () => hitungSemua(true));
+    });
+    await loadAllDataFromServer(); // Memuat data dan memicu populateUIWithData dan updateChart
     document.getElementById('tahun-sekarang').textContent = new Date().getFullYear();
 };
