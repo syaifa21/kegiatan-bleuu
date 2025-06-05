@@ -3,8 +3,8 @@
     --primary-color: #3b82f6; /* Warna biru yang lebih gelap, cocok dengan langit malam */
     --secondary-color: #22c55e; /* Hijau cerah untuk tombol */
     --accent-color: #facc15; /* Kuning cerah untuk aksen */
-    --background-color: #090a0f; /* Latar belakang paling gelap */
-    --card-background-color: rgba(30, 41, 59, 0.9); /* Latar belakang kartu sedikit transparan dan gelap */
+    --background-color: #2f3138; /* Latar belakang paling gelap */
+    --card-background-color: rgba(53, 89, 148, 0.9); /* Latar belakang kartu sedikit transparan dan gelap */
     --text-color: #e2e8f0; /* Warna teks utama menjadi terang */
     --text-light-color: #9ca3af; /* Abu-abu terang untuk teks sekunder */
     --border-color: rgba(71, 85, 105, 0.5); /* Warna border yang lebih gelap/transparan */
@@ -31,25 +31,88 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* Animasi untuk berkelip */
+@keyframes twinkle {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 0.3; }
+}
+
+@keyframes sparkle {
+    0%, 100% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+    25% {
+        transform: scale(1.2);
+        filter: brightness(1.5);
+    }
+    75% {
+        transform: scale(0.8);
+        filter: brightness(0.7);
+    }
+}
+
 .stars {
     width: 1px;
     height: 1px;
     position: absolute;
     background: white;
-    box-shadow: 2vw 5vh 2px white, 10vw 8vh 2px white, 15vw 15vh 1px white,
-        22vw 22vh 1px white, 28vw 12vh 2px white, 32vw 32vh 1px white,
-        38vw 18vh 2px white, 42vw 35vh 1px white, 48vw 25vh 2px white,
-        53vw 42vh 1px white, 58vw 15vh 2px white, 63vw 38vh 1px white,
-        68vw 28vh 2px white, 73vw 45vh 1px white, 78vw 32vh 2px white,
-        83vw 48vh 1px white, 88vw 20vh 2px white, 93vw 52vh 1px white,
-        98vw 35vh 2px white, 5vw 60vh 1px white, 12vw 65vh 2px white,
-        18vw 72vh 1px white, 25vw 78vh 2px white, 30vw 85vh 1px white,
-        35vw 68vh 2px white, 40vw 82vh 1px white, 45vw 92vh 2px white,
-        50vw 75vh 1px white, 55vw 88vh 2px white, 60vw 95vh 1px white,
-        65vw 72vh 2px white, 70vw 85vh 1px white, 75vw 78vh 2px white,
-        80vw 92vh 1px white, 85vw 82vh 2px white, 90vw 88vh 1px white,
-        95vw 75vh 2px white;
-    animation: twinkle 8s infinite linear;
+    border-radius: 50%; /* Membuat bintang lebih bulat */
+}
+
+/* Bintang-bintang dengan efek gemerlap utama */
+.stars-1 {
+    box-shadow: 2vw 5vh 2px rgba(255, 255, 255, 0.9), /* Sedikit buram */
+                10vw 8vh 2px rgba(255, 255, 255, 0.8),
+                15vw 15vh 1px rgba(255, 255, 255, 0.7),
+                22vw 22vh 1px rgba(255, 255, 255, 0.6),
+                28vw 12vh 2px rgba(255, 255, 255, 0.9),
+                32vw 32vh 1px rgba(255, 255, 255, 0.7),
+                38vw 18vh 2px rgba(255, 255, 255, 0.8),
+                42vw 35vh 1px rgba(255, 255, 255, 0.6),
+                48vw 25vh 2px rgba(255, 255, 255, 0.9),
+                53vw 42vh 1px rgba(255, 255, 255, 0.7),
+                58vw 15vh 2px rgba(255, 255, 255, 0.8),
+                63vw 38vh 1px rgba(255, 255, 255, 0.6),
+                68vw 28vh 2px rgba(255, 255, 255, 0.9),
+                73vw 45vh 1px rgba(255, 255, 255, 0.7),
+                78vw 32vh 2px rgba(255, 255, 255, 0.8),
+                83vw 48vh 1px rgba(255, 255, 255, 0.6),
+                88vw 20vh 2px rgba(255, 255, 255, 0.9),
+                93vw 52vh 1px rgba(255, 255, 255, 0.7),
+                98vw 35vh 2px rgba(255, 255, 255, 0.8);
+    animation: twinkle 3s infinite linear alternate; /* Variasi durasi dan arah */
+}
+
+/* Bintang-bintang dengan posisi dan animasi berbeda */
+.stars-2 {
+    box-shadow: 5vw 60vh 1px rgba(255, 255, 255, 0.6),
+                12vw 65vh 2px rgba(255, 255, 255, 0.9),
+                18vw 72vh 1px rgba(255, 255, 255, 0.7),
+                25vw 78vh 2px rgba(255, 255, 255, 0.8),
+                30vw 85vh 1px rgba(255, 255, 255, 0.6),
+                35vw 68vh 2px rgba(255, 255, 255, 0.9),
+                40vw 82vh 1px rgba(255, 255, 255, 0.7),
+                45vw 92vh 2px rgba(255, 255, 255, 0.8),
+                50vw 75vh 1px rgba(255, 255, 255, 0.6),
+                55vw 88vh 2px rgba(255, 255, 255, 0.9),
+                60vw 95vh 1px rgba(255, 255, 255, 0.7);
+    animation: twinkle 2.5s infinite linear reverse; /* Durasi dan arah lain */
+}
+
+/* Bintang-bintang ketiga dengan animasi sparkle yang lebih intens */
+.stars-3 {
+    box-shadow: 65vw 72vh 2px rgba(255, 255, 255, 0.9),
+                70vw 85vh 1px rgba(255, 255, 255, 0.7),
+                75vw 78vh 2px rgba(255, 255, 255, 0.8),
+                80vw 92vh 1px rgba(255, 255, 255, 0.6),
+                85vw 82vh 2px rgba(255, 255, 255, 0.9),
+                90vw 88vh 1px rgba(255, 255, 255, 0.7),
+                95vw 75vh 2px rgba(255, 255, 255, 0.8),
+                3vw 10vh 2px rgba(255, 255, 255, 0.9),
+                98vw 5vh 1px rgba(255, 255, 255, 0.7),
+                50vw 5vh 2px rgba(255, 255, 255, 0.8);
+    animation: twinkle 3.5s infinite ease-in-out, sparkle 1.5s infinite ease-in-out alternate; /* Kombinasi animasi */
 }
 
 .shooting-star {
@@ -425,3 +488,52 @@ footer {
     .modal-footer button { width: 100%; margin-bottom: 0.5rem; }
     .modal-footer button:last-child { margin-bottom: 0;}
  }
+
+
+
+
+
+ 
+@keyframes moonRotation {
+    0% {
+
+		background-position: 0% 0%;
+    border: 0px solid #00000000;
+	}
+	50% {
+
+		background-position: 150% 0%;
+    border: 0px solid #00000000;
+	}
+	100% {
+        position: 100;
+
+		background-position: 300% 0%;
+    border: 0px solid #00000000;
+	}
+}
+
+.moon-background{
+  top: 3.5rem;
+  right: 75%;
+  display: block;
+  width: 15rem;
+  height: 15rem;
+  position: absolute;
+  border-radius: 50%;
+  background-image: url('https://www.solarsystemscope.com/textures/download/2k_moon.jpg');
+  background-repeat: repeat-x;
+  background-size: 110% 100%;
+  opacity: 1;
+  animation-name: moonRotation;
+  animation-duration: 30s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-fill-mode: forwards !important;
+  box-shadow: inset -10px 8px 6px -5px #ffffff, 
+inset 20px -20px 40px 30px rgba(0, 0, 0, 0.9), 7px -6px 14px rgba(255, 255, 255, 0.3215686275);
+}
+
+
+/* star */
+

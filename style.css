@@ -1,10 +1,10 @@
 :root {
-    --primary-color: #3b82f6; /* Warna biru yang lebih gelap, cocok dengan langit malam */
-    --primary-hover-color: #2563eb; /* Hover yang sedikit lebih gelap */
-    --secondary-color: #9ca3af; /* Abu-abu netral untuk teks sekunder */
+    --primary-color: #1000a5; /* Warna biru yang lebih gelap, cocok dengan langit malam */
+    --primary-hover-color: #000000; /* Hover yang sedikit lebih gelap */
+    --secondary-color: #6e9ff3; /* Abu-abu netral untuk teks sekunder */
     --light-color: #1a202c; /* Warna latar belakang yang lebih gelap untuk elemen ringan */
     --dark-color: #e2e8f0; /* Warna teks yang lebih terang untuk latar belakang gelap */
-    --card-bg-color: rgba(30, 41, 59, 0.9); /* Latar belakang kartu sedikit transparan dan gelap */
+    --card-bg-color: rgba(61, 61, 61, 0.24); /* Latar belakang kartu sedikit transparan dan gelap */
     --border-color: rgba(71, 85, 105, 0.5); /* Warna border yang lebih gelap/transparan */
     --shadow-color: rgba(0, 0, 0, 0.2); /* Bayangan yang lebih menonjol di latar gelap */
     --font-family-sans-serif: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -57,7 +57,8 @@ body {
 }
 
 .shooting-star {
-  position: absolute;
+    opacity: 0;
+  position: fixed;
   width: 100px;
   height: 2px;
   background: linear-gradient(90deg, white, transparent);
@@ -67,31 +68,31 @@ body {
 
 .shooting-star:nth-child(2) { /* Nth-child ini akan mulai dari elemen shooting-star pertama di HTML */
   top: 20%;
-  left: -100px;
+  left: 100px;
   animation-delay: 0s;
 }
 
 .shooting-star:nth-child(3) {
   top: 35%;
-  left: -100px;
+  left: 100px;
   animation-delay: 1s;
 }
 
 .shooting-star:nth-child(4) {
   top: 50%;
-  left: -100px;
+  left: 100px;
   animation-delay: 2s;
 }
 
 .shooting-star:nth-child(5) {
   top: 65%;
-  left: -100px;
+  left: 100px;
   animation-delay: 3s;
 }
 
 .shooting-star:nth-child(6) {
   top: 80%;
-  left: -100px;
+  left: 100px;
   animation-delay: 4s;
 }
 
@@ -109,6 +110,10 @@ body {
 @keyframes shoot {
   0% {
     transform: translateX(0) translateY(0) rotate(25deg);
+    opacity: 0;
+  }
+  50% {
+    transform: translateX(120vw) translateY(50vh) rotate(25deg);
     opacity: 1;
   }
   100% {
@@ -120,7 +125,7 @@ body {
 /* Additional twinkling stars with different animation timing */
 .stars::after {
   content: "";
-  position: absolute;
+  position: fixed;
   width: 1px;
   height: 1px;
   background: white;
@@ -148,7 +153,7 @@ body {
 
 header {
     /* Gradien header disesuaikan agar lebih cocok dengan tema malam */
-    background: linear-gradient(120deg, #1d4ed8 0%, #0c4a6e 100%); /* Biru gelap ke biru tua */
+    background: linear-gradient(120deg, #ececec25 0%, #00436925 100%); /* Biru gelap ke biru tua */
     color: white;
     padding: 20px 25px;
     border-radius: 16px;
@@ -167,15 +172,15 @@ header {
 
 .header-title-group { flex-grow: 1; }
 header #greetingMessage { margin: 0; font-size: 1.9em; font-weight: 700; line-height: 1.2; }
-header #liveClock { font-size: 2em; font-weight: 400; color: rgba(255, 255, 255, 0.7); margin-top: 4px; letter-spacing: 0.5px; } /* Warna jam disesuaikan */
-header #liveClock::before { content: "🕒 "; margin-right: 6px; opacity: 0.8; }
+header #liveClock { font-size: 2em; font-weight: 400; color: rgb(255, 255, 255); margin-top: 4px; letter-spacing: 0.5px; } /* Warna jam disesuaikan */
+header #liveClock::before { content: "🕒 "; margin-right: 6px; opacity: 1; }
 .header-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .navigation-tabs { display:flex; gap:6px; background-color: rgba(255, 255, 255, 0.1); padding: 5px; border-radius: 8px; } /* Latar navigasi lebih transparan */
 .navigation-tabs .btn { background-color: transparent; color: rgba(255, 255, 255, 0.8); border: none; padding: 7px 14px; font-size: 0.85em; font-weight: 500; border-radius: 6px; transition: background-color 0.25s ease, color 0.25s ease, transform 0.2s ease; position: relative; }
-.navigation-tabs .btn:hover { background-color: rgba(255, 255, 255, 0.2); color: white; transform: translateY(-1px); } /* Hover lebih kontras */
-.navigation-tabs .btn.active { background-color: var(--card-bg-color); color: var(--primary-color); font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.2); } /* Warna aktif dari card-bg-color baru */
+.navigation-tabs .btn:hover { background-color: rgba(255, 255, 255, 0.2); color: rgb(255, 255, 255); transform: translateY(-1px); } /* Hover lebih kontras */
+.navigation-tabs .btn.active { background-color: var(--card-bg-color); color: rgb(255, 255, 255); font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.2); } /* Warna aktif dari card-bg-color baru */
 header button#openInputModalBtn { background-color: var(--status-belum); color: var(--dark-color); border: none; font-weight: 600; padding: 10px 20px; font-size: 0.9em; border-radius: 8px; box-shadow: 0 3px 7px rgba(0,0,0,0.2); transition: background-color 0.25s ease, transform 0.2s ease, box-shadow 0.2s ease; } /* Warna tombol lebih terang */
-header button#openInputModalBtn:hover { background-color: #d97706; color: white; transform: translateY(-2px) scale(1.02); box-shadow: 0 5px 10px rgba(0,0,0,0.3); } /* Hover tombol lebih gelap */
+header button#openInputModalBtn:hover { background-color: #d97706; color: rgb(8, 0, 117); transform: translateY(-2px) scale(1.02); box-shadow: 0 5px 10px rgba(0,0,0,0.3); } /* Hover tombol lebih gelap */
 
 /* MEDIA QUERIES UNTUK LAYAR SEDANG (misal tablet dalam mode portrait) */
 @media (max-width: 880px) {
@@ -335,7 +340,7 @@ header button#openInputModalBtn:hover { background-color: #d97706; color: white;
         max-width: 95%; /* Agak lebih kecil */
     }
     .auth-container h2 {
-        font-size: 1.4em;
+        font-size: 1.5em;
     }
     .auth-container .btn {
         padding: 9px 14px;
@@ -473,7 +478,7 @@ label, .detail-label { display: block; margin-bottom: 6px; font-weight: 500; col
 #attachmentPreviewArea { margin-top: 10px; padding: 12px; border: 1px dashed var(--border-color); min-height: 100px; max-height: 350px; overflow: auto; display: flex; justify-content: center; align-items: center; background-color: var(--light-color); border-radius: 8px; }
 #attachmentPreviewArea img, #attachmentPreviewArea iframe, #attachmentPreviewArea embed { max-width: 100%; max-height: 330px; display: block; margin: auto; border-radius: 4px; }
 #attachmentPreviewArea pre { white-space: pre-wrap; word-wrap: break-word; font-size: 0.9em; max-height: 330px; overflow-y: auto; width: 100%; padding: 8px; background-color: var(--light-color); border: 1px solid var(--border-color); border-radius: 4px; color: var(--dark-color); }
-input[type="text"], input[type="date"], input[type="time"], textarea, select, input[type="file"] { width: 100%; padding: 10px 12px; box-sizing: border-box; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.95em; font-family: var(--font-family-sans-serif); background-color: var(--light-color); color: var(--dark-color); transition: border-color 0.2s ease, box-shadow 0.2s ease; } /* Input form disesuaikan */
+input[type="text"], input[type="password"], input[type="date"], input[type="time"], textarea, select, input[type="file"] { width: 100%; padding: 10px 12px; box-sizing: border-box; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.95em; font-family: var(--font-family-sans-serif); background-color: var(--light-color); color: var(--dark-color); transition: border-color 0.2s ease, box-shadow 0.2s ease; } /* Input form disesuaikan */
 input[type="text"]:focus, input[type="date"]:focus, input[type="time"]:focus, textarea:focus, select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 0.15rem rgba(59, 130, 246, .25); outline: none; } /* Warna fokus disesuaikan */
 input[readonly] { background-color: rgba(71, 85, 105, 0.2); cursor: not-allowed; } /* Warna readonly disesuaikan */
 .btn { padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95em; font-weight: 500; transition: all 0.2s ease; text-decoration: none; display: inline-block; }
@@ -526,7 +531,7 @@ form button[type="submit"] { width: 100%; margin-top: 8px;}
 .calendar-view th, .calendar-view td { padding: 4px; height: 70px; font-size: 0.8em; border: 1px solid var(--border-color); text-align: left; vertical-align: top;}
 .calendar-view th { background-color: rgba(71, 85, 105, 0.2); text-align: center; font-weight: 600; padding: 8px 3px; color: var(--secondary-color); } /* Header kalender disesuaikan */
 .calendar-view .date-number { font-weight: 600; font-size: 0.9em; display: block; margin-bottom: 3px; color: var(--dark-color); }
-.calendar-view .today .date-number { color: var(--primary-color); background-color: rgba(59, 130, 246, 0.2); border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; padding: 1px; box-shadow: 0 0 3px var(--primary-color); } /* Warna 'hari ini' disesuaikan */
+.calendar-view .today .date-number { color: rgb(255, 255, 255); background-color: rgba(59, 130, 246, 0.2); border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; padding: 1px; box-shadow: 0 0 3px var(--primary-color); } /* Warna 'hari ini' disesuaikan */
 .calendar-view .other-month .date-number { color: #475569; } /* Warna angka bulan lain disesuaikan */
 .calendar-view .other-month { background-color: rgba(30, 41, 59, 0.5); } /* Latar belakang bulan lain disesuaikan */
 .calendar-tasks-wrapper { max-height: 35px; overflow-y: auto; }
@@ -644,7 +649,7 @@ small.validation-message { font-size: 0.8em; margin-top: 4px; display: block; co
 /* Override default for button.btn-secondary in modal auth */
 .auth-container .btn-secondary {
     background-color: var(--secondary-color);
-    color: white;
+    color: rgb(0, 0, 0);
 }
 .auth-container .btn-secondary:hover {
     background-color: #6b7280;
@@ -672,4 +677,51 @@ small.validation-message { font-size: 0.8em; margin-top: 4px; display: block; co
         padding: 10px 15px;
         font-size: 0.9em;
     }
+}
+
+
+
+
+
+
+ 
+@keyframes moonRotation {
+    0% {
+
+		background-position: 0% 0%;
+    border: 0px solid #00000000;
+	}
+	50% {
+
+		background-position: 150% 0%;
+    border: 0px solid #00000000;
+	}
+	100% {
+        position: 100;
+
+		background-position: 300% 0%;
+    border: 0px solid #00000000;
+	}
+}
+
+.moon-background{
+  top: 3.5rem;
+  right: 50%;
+  top: 50px;
+  display: block;
+  width: 15rem;
+  height: 15rem;
+  position: fixed;
+  border-radius: 50%;
+  background-image: url('https://www.solarsystemscope.com/textures/download/2k_moon.jpg');
+  background-repeat: repeat-x;
+  background-size: 110% 100%;
+  opacity: 1;
+  animation-name: moonRotation;
+  animation-duration: 30s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-fill-mode: forwards !important;
+  box-shadow: inset -10px 8px 6px -5px #ffffff, 
+inset 20px -20px 40px 30px rgba(0, 0, 0, 0.9), 7px -6px 14px rgba(255, 255, 255, 0.3215686275);
 }

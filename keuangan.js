@@ -14,7 +14,7 @@ let allFinancialData = {
     }
 };
 
-let currentMonthKey; // FormatYYYY-MM
+let currentMonthKey; // Format YYYY-MM
 let monthlyChart = null; // Initialize to null for Chart.js destruction logic
 
 const MONTHS = [
@@ -47,7 +47,6 @@ function getCurrentMonthData() {
     if (!allFinancialData[currentMonthKey]) {
         // Return a default structure if data for the current month doesn't exist
         return {
-            // gajiUtama will now be calculated, not directly stored as an input
             alokasiPersen: [20, 50, 20, 10], // Default percentages
             pendapatanItems: [],
             pengeluaranItems: []
@@ -62,7 +61,6 @@ function getGlobalData() {
 
 async function saveDataToServer(monthKey, monthData, globalData) {
     console.log("CLIENT: Mencoba menyimpan data ke server...");
-    // Remove gajiUtama from monthData before sending if it's now a derived value
     // Create a copy to avoid modifying the original monthData object that might be in use
     const dataToSaveMonth = { ...monthData };
     delete dataToSaveMonth.gajiUtama; // This was previously an input, now it's derived
@@ -73,7 +71,7 @@ async function saveDataToServer(monthKey, monthData, globalData) {
             headers: { 'Content-Type': 'application/json', },
             body: JSON.stringify({
                 monthKey: monthKey,
-                monthData: dataToSaveMonth, // Send the modified monthData
+                monthData: dataToSaveMonth,
                 globalData: globalData
             }),
         });
@@ -139,9 +137,6 @@ async function loadAllDataFromServer() {
 function populateUIWithData(monthData, globalData) {
     console.log("CLIENT: Memulai populateUIWithData dengan data bulanan:", monthData, "dan global:", globalData);
 
-    // Gaji utama sekarang adalah derived value, akan diisi oleh hitungSemua()
-    // document.getElementById('gaji-utama').value = monthData.gajiUtama || 0; // REMOVED
-
     const inputPersenAlokasi = document.querySelectorAll('#tabel-alokasi tbody .persen-alokasi');
     inputPersenAlokasi.forEach((input, index) => {
         input.value = (monthData.alokasiPersen && monthData.alokasiPersen[index] !== undefined) ? monthData.alokasiPersen[index] : (['20', '50', '20', '10'][index] || '0');
@@ -173,7 +168,6 @@ function populateUIWithData(monthData, globalData) {
 
     formatInitialAmounts();
     hitungSemua(false); // Hitung ulang tanpa menyimpan ke server karena ini adalah pemuatan
-    // updateChart() is called inside hitungSemua
     console.log("CLIENT: Selesai populateUIWithData.");
 }
 
@@ -265,7 +259,6 @@ function loadDataForSelectedMonth() {
 function hitungAlokasi() {
     const totalPendapatanBulananAktual = parseRupiah(document.getElementById('total-pendapatan-bulanan').textContent) + parseRupiah(document.getElementById('total-pendapatan-tetap').textContent);
 
-    // Set the 'Gaji Utama' (now 'Total Pendapatan untuk Alokasi') input to this calculated value
     const totalPendapatanAlokasiInput = document.getElementById('total-pendapatan-alokasi');
     totalPendapatanAlokasiInput.value = totalPendapatanBulananAktual;
 
@@ -282,7 +275,6 @@ function hitungAlokasi() {
         if (inputPersen && selJumlahAlokasi) {
             const persen = parseFloat(inputPersen.value) || 0;
             totalPersen += persen;
-            // Calculate based on the derived total income for allocation
             const jumlahAlokasi = (persen / 100) * totalPendapatanBulananAktual;
             selJumlahAlokasi.textContent = formatRupiahDisplay(jumlahAlokasi);
             totalRupiahAlokasi += jumlahAlokasi;
@@ -415,8 +407,8 @@ function editCell(cell, isNumeric = false, tableId = null) {
     input.style.border = '1px solid var(--primary-color)';
     input.style.borderRadius = 'var(--border-radius)';
     input.style.fontSize = 'inherit';
-    input.style.backgroundColor = 'var(--light-color)'; /* Disini disesuaikan */
-    input.style.color = 'var(--text-color)'; /* Disini disesuaikan */
+    input.style.backgroundColor = 'var(--light-color)';
+    input.style.color = 'var(--text-color)';
 
     cell.innerHTML = '';
     cell.appendChild(input);
@@ -436,15 +428,12 @@ function editCell(cell, isNumeric = false, tableId = null) {
 }
 
 function hitungRingkasanBulanan() {
-    // totalPendapatanBulanan dan totalPengeluaranBulanan sudah dihitung di fungsi hitungTotal sebelumnya
     const totalPendapatanBulanan = hitungTotal('tabel-pendapatan-bulanan', 'amount-income-bulanan', 'total-pendapatan-bulanan');
     const totalPengeluaranBulanan = hitungTotal('tabel-pengeluaran-bulanan', 'amount-expense-bulanan', 'total-pengeluaran-bulanan');
     const totalPendapatanTetap = hitungTotal('tabel-pendapatan-tetap', 'amount-income-tetap', 'total-pendapatan-tetap');
     const totalPengeluaranTetap = hitungTotal('tabel-pengeluaran-tetap', 'amount-expense-tetap', 'total-pengeluaran-tetap');
 
-    // Total pendapatan bersih bulanan = Pendapatan Bulanan + Pendapatan Tetap
     const totalPendapatanBersihBulanan = totalPendapatanBulanan + totalPendapatanTetap;
-    // Total pengeluaran bersih bulanan = Pengeluaran Bulanan + Pengeluaran Tetap
     const totalPengeluaranBersihBulanan = totalPengeluaranBulanan + totalPengeluaranTetap;
 
     const sisaDanaBulanan = totalPendapatanBersihBulanan - totalPengeluaranBersihBulanan;
@@ -467,7 +456,6 @@ function hitungRingkasanGlobal() {
         globalTotalPengeluaranTetapBulanan += parseRupiah(item.jumlah);
     });
 
-    // Proyeksi 1 tahun dari item tetap (nilai bulanan * 12)
     const totalPendapatanTetapProjTahunan = globalTotalPendapatanTetapBulanan * 12;
     const totalPengeluaranTetapProjTahunan = globalTotalPengeluaranTetapBulanan * 12;
 
@@ -486,7 +474,6 @@ function hitungRingkasanGlobal() {
         }
     }
 
-    // Pendapatan Global = (Proyeksi Tahunan Pendapatan Tetap) + (Akumulasi Pendapatan Bulanan dari semua bulan yang ada)
     const finalGlobalTotalPendapatan = totalPendapatanTetapProjTahunan + totalPendapatanBulananAkumulasi;
     const finalGlobalTotalPengeluaran = totalPengeluaranTetapProjTahunan + totalPengeluaranBulananAkumulasi;
 
@@ -516,20 +503,18 @@ function formatInitialAmounts() {
 function hitungSemua(shouldSave = true) {
     console.log(`CLIENT: hitungSemua dipanggil. Simpan ke server: ${shouldSave}`);
 
-    // Hitung total pendapatan bulanan aktual untuk alokasi sebelum hitungAlokasi
     const totalPendapatanBulananSaatIni = hitungTotal('tabel-pendapatan-bulanan', 'amount-income-bulanan', 'total-pendapatan-bulanan');
     const totalPendapatanTetapSaatIni = hitungTotal('tabel-pendapatan-tetap', 'amount-income-tetap', 'total-pendapatan-tetap');
     const totalUntukAlokasi = totalPendapatanBulananSaatIni + totalPendapatanTetapSaatIni;
 
-    document.getElementById('total-pendapatan-alokasi').value = totalUntukAlokasi; // Update the readonly input
-    document.getElementById('total-pendapatan-alokasi').dispatchEvent(new Event('input')); // Trigger input event for alokasi
+    document.getElementById('total-pendapatan-alokasi').value = totalUntukAlokasi;
+    document.getElementById('total-pendapatan-alokasi').dispatchEvent(new Event('input'));
 
-    hitungAlokasi(); // Will now use the new total for allocation
+    hitungAlokasi();
     hitungRingkasanBulanan();
     hitungRingkasanGlobal();
 
     if (shouldSave) {
-        // Gaji Utama (total-pendapatan-alokasi) tidak disimpan lagi karena derived value
         const alokasiPersen = Array.from(document.querySelectorAll('#tabel-alokasi tbody .persen-alokasi')).map(input => input.value);
 
         const pendapatanItems = Array.from(document.querySelectorAll('#tabel-pendapatan-bulanan tbody tr')).map(row => ({
@@ -542,7 +527,6 @@ function hitungSemua(shouldSave = true) {
         }));
 
         const currentMonthData = {
-            // gajiUtama: totalUntukAlokasi, // No longer directly saved as input, but as derived value
             alokasiPersen: alokasiPersen,
             pendapatanItems: pendapatanItems,
             pengeluaranItems: pengeluaranItems
@@ -561,7 +545,6 @@ function hitungSemua(shouldSave = true) {
             pengeluaranTetap: pengeluaranTetap
         };
 
-        // Update the global allFinancialData object
         allFinancialData[currentMonthKey] = currentMonthData;
         allFinancialData.global = globalData;
 
@@ -651,15 +634,15 @@ function initChart() {
             datasets: [
                 {
                     label: 'Total Pendapatan',
-                    backgroundColor: 'rgba(40, 167, 69, 0.7)', /* Keep green for income */
-                    borderColor: 'rgba(40, 167, 69, 1)',
+                    backgroundColor: 'var(--primary-color)', /* Menggunakan variabel CSS untuk warna hijau cerah */
+                    borderColor: 'var(--primary-color)',
                     borderWidth: 1,
                     data: [],
                 },
                 {
                     label: 'Total Pengeluaran',
-                    backgroundColor: 'rgba(220, 53, 69, 0.7)', /* Keep red for expense */
-                    borderColor: 'rgba(220, 53, 69, 1)',
+                    backgroundColor: 'var(--danger-color)', /* Menggunakan variabel CSS untuk warna merah */
+                    borderColor: 'var(--danger-color)',
                     borderWidth: 1,
                     data: [],
                 }
@@ -671,19 +654,19 @@ function initChart() {
             scales: {
                 x: {
                     beginAtZero: true,
-                    grid: { display: false, color: 'rgba(71, 85, 105, 0.2)' }, /* Grid lines for dark theme */
+                    grid: { display: false, color: 'rgba(255, 255, 255, 0.73)' },
                     ticks: {
-                        color: 'var(--text-light-color)' /* Axis labels color */
+                        color: 'var(--text-light-color)'
                     }
                 },
                 y: {
                     beginAtZero: true,
-                    grid: { color: 'rgba(71, 85, 105, 0.2)' }, /* Grid lines for dark theme */
+                    grid: { color: 'rgba(255, 255, 255, 0.73)' },
                     ticks: {
                         callback: function(value, index, values) {
                             return formatRupiahDisplay(value);
                         },
-                        color: 'var(--text-light-color)' /* Axis labels color */
+                        color: 'var(--text-light-color)'
                     }
                 }
             },
@@ -701,20 +684,20 @@ function initChart() {
                             return label;
                         }
                     },
-                    backgroundColor: 'rgba(0,0,0,0.8)', /* Dark tooltip background */
-                    titleColor: 'var(--text-color)', /* Light title color */
-                    bodyColor: 'var(--text-color)' /* Light body color */
+                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                    titleColor: 'var(--primary-color)',
+                    bodyColor: 'var(--primary-color)'
                 },
                 legend: {
                     position: 'top',
                     labels: {
-                        color: 'var(--text-color)' /* Legend labels color */
+                        color: 'var(--primary-color)'
                     }
                 },
                 title: {
                     display: true,
                     text: 'Perbandingan Pendapatan vs Pengeluaran Bulanan',
-                    color: 'var(--text-color)' /* Chart title color */
+                    color: 'var(--text-color)'
                 }
             }
         }
@@ -751,14 +734,13 @@ function updateChart() {
             const [year, monthNum] = monthKey.split('-');
             chartLabels.push(`${MONTHS[parseInt(monthNum) - 1].substring(0,3)} ${year.substring(2)}`);
 
-            // Total pendapatan untuk chart sekarang hanya pendapatan bulanan (tanpa "Gaji Utama" sebagai input) + pendapatan tetap bulanan
-            let totalIncome = 0; // Mulai dari 0
+            let totalIncome = 0;
             (monthData.pendapatanItems || []).forEach(item => totalIncome += parseRupiah(item.jumlah));
-            totalIncome += globalFixedIncomePerMonth; // Tambahkan pendapatan tetap bulanan
+            totalIncome += globalFixedIncomePerMonth;
 
             let totalExpense = 0;
             (monthData.pengeluaranItems || []).forEach(item => totalExpense += parseRupiah(item.jumlah));
-            totalExpense += globalFixedExpensePerMonth; // Tambahkan pengeluaran tetap bulanan
+            totalExpense += globalFixedExpensePerMonth;
 
             chartIncomeData.push(totalIncome);
             chartExpenseData.push(totalExpense);
@@ -773,21 +755,18 @@ function updateChart() {
 }
 
 
-// Fungsi Ekspor (Perlu diperbarui untuk mencakup data global dan bulanan)
+// Fungsi Ekspor
 function collectDataForExport() {
     const data = {
         periodeLaporan: `Laporan Keuangan Pribadi per ${new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric'})}`,
-        selectedMonthData: {}, // Data untuk bulan yang sedang aktif
-        globalData: allFinancialData.global, // Data global
-        allMonthlyData: {} // Semua data bulanan
+        selectedMonthData: {},
+        globalData: allFinancialData.global,
+        allMonthlyData: {}
     };
 
-    // Current month data
-    // total-pendapatan-alokasi kini adalah hasil perhitungan, bukan input yang disimpan
     const totalPendapatanUntukAlokasi = parseRupiah(document.getElementById('total-pendapatan-alokasi').value) || 0;
 
     data.selectedMonthData = {
-        // gajiUtama: totalPendapatanUntukAlokasi, // Ini tidak lagi gaji utama yang diinput, tapi total untuk alokasi
         alokasiPersen: Array.from(document.querySelectorAll('#tabel-alokasi tbody .persen-alokasi')).map(input => parseFloat(input.value) || 0),
         alokasiJumlah: Array.from(document.querySelectorAll('#tabel-alokasi tbody .jumlah-alokasi')).map(td => parseRupiah(td.textContent)),
         pendapatanItems: Array.from(document.querySelectorAll('#tabel-pendapatan-bulanan tbody tr')).map(row => ({
@@ -799,11 +778,9 @@ function collectDataForExport() {
             jumlah: parseRupiah(row.cells[1].textContent)
         }))
     };
-    // Tambahkan total pendapatan untuk alokasi ke selectedMonthData untuk kebutuhan ekspor
     data.selectedMonthData.totalPendapatanUntukAlokasi = totalPendapatanUntukAlokasi;
 
 
-    // All monthly data for global summary in export
     data.allMonthlyData = {};
     for (const monthKey in allFinancialData) {
         if (monthKey !== 'global') {
@@ -811,24 +788,22 @@ function collectDataForExport() {
         }
     }
 
-    // Calculate summaries for current month for export (using values from UI for current month)
     data.summaryBulanan = {
         totalPendapatan: parseRupiah(document.getElementById('summary-total-pendapatan-bulanan').textContent),
         totalPengeluaran: parseRupiah(document.getElementById('summary-total-pengeluaran-bulanan').textContent),
         sisaDana: parseRupiah(document.getElementById('summary-sisa-dana-bulanan').textContent)
     };
 
-    // Calculate summaries for global data for export (re-calculate to ensure consistency)
     let exportGlobalTotalPendapatan = 0;
     let exportGlobalTotalPengeluaran = 0;
 
     let globalFixedIncomePerMonth = 0;
     (data.globalData.pendapatanTetap || []).forEach(item => globalFixedIncomePerMonth += parseRupiah(item.jumlah));
-    exportGlobalTotalPendapatan += globalFixedIncomePerMonth * 12; // Kali 12 untuk proyeksi tahunan
+    exportGlobalTotalPendapatan += globalFixedIncomePerMonth * 12;
 
     let globalFixedExpensePerMonth = 0;
     (data.globalData.pengeluaranTetap || []).forEach(item => globalFixedExpensePerMonth += parseRupiah(item.jumlah));
-    exportGlobalTotalPengeluaran += globalFixedExpensePerMonth * 12; // Kali 12 untuk proyeksi tahunan
+    exportGlobalTotalPengeluaran += globalFixedExpensePerMonth * 12;
 
     for (const monthKey in data.allMonthlyData) {
         if (monthKey !== 'global') {
@@ -887,7 +862,7 @@ function exportData(format) {
         content += '\n';
 
         content += `"${currentMonthKey} - Data Bulanan"\n`;
-        content += `"Total Pendapatan untuk Alokasi:","${formatAngka(data.selectedMonthData.totalPendapatanUntukAlokasi)}"\n\n`; // Menampilkan total pendapatan untuk alokasi
+        content += `"Total Pendapatan untuk Alokasi:","${formatAngka(data.selectedMonthData.totalPendapatanUntukAlokasi)}"\n\n`;
         content += `"Alokasi Dana"\n`;
         content += `"Kategori Alokasi","Persen (%)","Jumlah (IDR)"\n`;
         const kategoriAlokasi = ['Tabungan/Investasi', 'Kebutuhan Pokok', 'Keinginan', 'Dana Lain'];
@@ -930,7 +905,7 @@ function exportData(format) {
         content += Garis + '\n';
 
         content += `\n${currentMonthKey.toUpperCase()} - DATA BULANAN\n` + Garis;
-        content += `Total Pendapatan untuk Alokasi: ${formatRpExport(data.selectedMonthData.totalPendapatanUntukAlokasi)}\n\n`; // Menampilkan total pendapatan untuk alokasi
+        content += `Total Pendapatan untuk Alokasi: ${formatRpExport(data.selectedMonthData.totalPendapatanUntukAlokasi)}\n\n`;
         content += "ALOKASI DANA BULANAN\n" + Garis;
         const kategoriAlokasi = ['Tabungan/Investasi', 'Kebutuhan Pokok', 'Keinginan', 'Dana Lain'];
         data.selectedMonthData.alokasiPersen.forEach((persen, idx) => {
@@ -977,15 +952,14 @@ function exportData(format) {
         const createTableHTML = (title, headers, rows, totalRow = null) => {
             let html = `<h3>${title}</h3><table><thead><tr>`;
             headers.forEach(header => html += `<th>${header}</th>`);
-            if (headers.length === 1 && rows.length > 0 && typeof rows[0][1] !== 'undefined') { // Generic check for second column if only one header
+            if (headers.length === 1 && rows.length > 0 && typeof rows[0][1] !== 'undefined') {
                 html += `<th>Jumlah</th>`;
             }
             html += "</tr></thead><tbody>";
             rows.forEach(row => {
                 html += `<tr>`;
                 row.forEach((cell, idx) => {
-                     // If it's the amount column and a number, format it
-                    html += `<td>${(idx === 1 || headers.length === 3 && idx === 2) && typeof cell === 'number' ? formatRpExport(cell) : cell}</td>`;
+                     html += `<td>${(idx === 1 || headers.length === 3 && idx === 2) && typeof cell === 'number' ? formatRpExport(cell) : cell}</td>`;
                 });
                 html += `</tr>`;
             });
@@ -1006,16 +980,16 @@ function exportData(format) {
             html += "</tr></thead><tbody>";
             rows.forEach(row => {
                 html += `<tr>`;
-                html += `<td>${row[0]}</td>`; // Deskripsi
-                html += `<td>${formatRpExport(row[1])}</td>`; // Jumlah Bulanan
-                html += `<td>${formatRpExport(row[1] * 12)}</td>`; // Proyeksi Tahunan
+                html += `<td>${row[0]}</td>`;
+                html += `<td>${formatRpExport(row[1])}</td>`;
+                html += `<td>${formatRpExport(row[1] * 12)}</td>`;
                 html += `</tr>`;
             });
             if (totalRow) {
                 html += `<tr class="total">`;
-                html += `<td>${totalRow[0]}</td>`; // Label Total
-                html += `<td>${formatRpExport(totalRow[1])}</td>`; // Total Bulanan
-                html += `<td>${formatRpExport(totalRow[1] * 12)}</td>`; // Total Tahunan
+                html += `<td>${totalRow[0]}</td>`;
+                html += `<td>${formatRpExport(totalRow[1])}</td>`;
+                html += `<td>${formatRpExport(totalRow[1] * 12)}</td>`;
                 html += `</tr>`;
             }
             html += "</tbody></table>";
@@ -1037,7 +1011,7 @@ function exportData(format) {
         );
 
         content += `<h2>Data Bulanan (${currentMonthKey})</h2>`;
-        content += `<h3>Total Pendapatan untuk Alokasi: ${formatRpExport(data.selectedMonthData.totalPendapatanUntukAlokasi)}</h3>`; // Menampilkan total pendapatan untuk alokasi
+        content += `<h3>Total Pendapatan untuk Alokasi: ${formatRpExport(data.selectedMonthData.totalPendapatanUntukAlokasi)}</h3>`;
 
         const alokasiHeaders = ['Kategori Alokasi', 'Persen (%)', 'Jumlah (IDR)'];
         const alokasiRows = [];

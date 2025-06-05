@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const dailyQuoteEl = document.getElementById('dailyQuote');
     let quotesData = []; // Akan diisi dari JSON
     let currentQuoteIndex = 0;
-    const QUOTE_CHANGE_INTERVAL_MS = 5000; // Durasi perubahan quote (10 detik)
+    const QUOTE_CHANGE_INTERVAL_MS = 60000; // Durasi perubahan quote (10 detik)
 
     async function fetchQuotes() {
         try {
