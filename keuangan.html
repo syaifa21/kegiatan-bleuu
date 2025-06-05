@@ -10,18 +10,12 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
-
-    <div class="moon-background"></div>
     <div class="stars"></div>
     <div class="shooting-star"></div>
     <div class="shooting-star"></div>
     <div class="shooting-star"></div>
     <div class="shooting-star"></div>
     <div class="shooting-star"></div>
-
-    <div class="stars stars-1"></div>
-    <div class="stars stars-2"></div>
-    <div class="stars stars-3"></div>
 
     <div class="app-container">
         <header class="app-header">
@@ -41,17 +35,17 @@
                 <div class="card-header"><h2>Alokasi Pendapatan Bulanan</h2></div>
                 <div class="card-content">
                     <div class="input-group">
-                        <label for="total-pendapatan-alokasi">Total Pendapatan untuk Alokasi:</label>
-                        <input type="number" id="total-pendapatan-alokasi" readonly>
+                        <label for="total-pendapatan-alokasi-display">Total Pendapatan untuk Alokasi:</label>
+                        <span id="total-pendapatan-alokasi-display" class="display-value">Rp 0</span>
                     </div>
                     <div class="table-responsive-wrapper">
                         <table id="tabel-alokasi">
                             <thead><tr><th>Kategori Alokasi</th><th>Persen (%)</th><th>Jumlah (IDR)</th></tr></thead>
                             <tbody>
-                                <tr><td>Tabungan/Investasi</td><td><input type="number" class="persen-alokasi" value="20" onchange="hitungSemua()"></td><td class="jumlah-alokasi">Rp 0</td></tr>
-                                <tr><td>Kebutuhan Pokok</td><td><input type="number" class="persen-alokasi" value="50" onchange="hitungSemua()"></td><td class="jumlah-alokasi">Rp 0</td></tr>
-                                <tr><td>Keinginan</td><td><input type="number" class="persen-alokasi" value="20" onchange="hitungSemua()"></td><td class="jumlah-alokasi">Rp 0</td></tr>
-                                <tr><td>Dana Lain</td><td><input type="number" class="persen-alokasi" value="10" onchange="hitungSemua()"></td><td class="jumlah-alokasi">Rp 0</td></tr>
+                                <tr><td>Tabungan/Investasi</td><td><input type="text" class="persen-alokasi" value="20" onchange="hitungSemua()"></td><td class="jumlah-alokasi">Rp 0</td></tr>
+                                <tr><td>Kebutuhan Pokok</td><td><input type="text" class="persen-alokasi" value="50" onchange="hitungSemua()"></td><td class="jumlah-alokasi">Rp 0</td></tr>
+                                <tr><td>Keinginan</td><td><input type="text" class="persen-alokasi" value="20" onchange="hitungSemua()"></td><td class="jumlah-alokasi">Rp 0</td></tr>
+                                <tr><td>Dana Lain</td><td><input type="text" class="persen-alokasi" value="10" onchange="hitungSemua()"></td><td class="jumlah-alokasi">Rp 0</td></tr>
                             </tbody>
                             <tfoot><tr class="total-row"><td>Total</td><td id="total-persen-alokasi">100%</td><td id="total-rupiah-alokasi">Rp 0</td></tr></tfoot>
                         </table>
@@ -112,40 +106,6 @@
                 </div>
             </section>
 
-            <section class="card" id="pendapatan-tetap-card">
-                <div class="card-header"><h2>Pendapatan Tetap (Global)</h2></div>
-                <div class="card-content">
-                    <div class="table-responsive-wrapper">
-                        <table id="tabel-pendapatan-tetap">
-                            <thead><tr><th>Sumber</th><th>Jumlah (IDR)</th><th>Aksi</th></tr></thead>
-                            <tbody>
-                            </tbody>
-                            <tfoot><tr class="total-row"><td>Total</td><td id="total-pendapatan-tetap" colspan="2">Rp 0</td></tr></tfoot>
-                        </table>
-                    </div>
-                </div>
-                <div class="button-actions-container">
-                    <button class="primary" onclick="openModal('pendapatan-tetap')">Tambah Pendapatan Tetap</button>
-                </div>
-            </section>
-
-            <section class="card" id="pengeluaran-tetap-card">
-                <div class="card-header"><h2>Pengeluaran Tetap (Global)</h2></div>
-                <div class="card-content">
-                    <div class="table-responsive-wrapper">
-                        <table id="tabel-pengeluaran-tetap">
-                            <thead><tr><th>Kategori</th><th>Jumlah (IDR)</th><th>Aksi</th></tr></thead>
-                            <tbody>
-                            </tbody>
-                            <tfoot><tr class="total-row"><td>Total</td><td id="total-pengeluaran-tetap" colspan="2">Rp 0</td></tr></tfoot>
-                        </table>
-                    </div>
-                </div>
-                <div class="button-actions-container">
-                    <button class="primary" onclick="openModal('pengeluaran-tetap')">Tambah Pengeluaran Tetap</button>
-                </div>
-            </section>
-
             <section class="card chart-card">
                 <div class="card-header"><h2>Grafik Keuangan Bulanan</h2></div>
                 <div class="card-content" style="width: 100%;">
@@ -167,7 +127,6 @@
             <button class="primary" onclick="hitungSemua(true)">Hitung & Simpan Data Bulan Ini</button>
             <button class="secondary" onclick="window.print()">Cetak Laporan (PDF)</button>
             <button id="delete-month-data-button" class="warning" onclick="deleteCurrentMonthData()">Hapus Data Bulan Ini</button>
-            <button id="clear-data-button" class="danger" onclick="clearAllDataOnServer()">Hapus Semua Data di Server</button>
         </div>
 
         <footer>
